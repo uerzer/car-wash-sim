@@ -363,6 +363,9 @@
         const busynessIndicatorEl = document.getElementById('busynessIndicator');
         const busynessTextEl = document.getElementById('busynessText');
 
+        // New global variable for dynamic employer SS rate
+        let currentEmployerSSRate = 0; // Initialize with 0, will be set by applyCountryConfig
+
         // Consolidate all input elements that should trigger recalculation on 'input'
         // (except select which uses 'change')
         const allRecalculatingInputEls = [
@@ -387,7 +390,7 @@
             if (selectedName === "Custom Average") {
                 customPriceGroupEl.style.display = 'block';
                  // Update selectedProgramName display immediately
-                selectedProgramNameEl.textContent = `Custom (€${(parseFloat(customAvgWashPriceEl.value) || 0).toFixed(2)})`;
+                selectedProgramNameEl.textContent = `Custom (${currentCurrency}${ (parseFloat(customAvgWashPriceEl.value) || 0).toFixed(2)})`;
             } else {
                 customPriceGroupEl.style.display = 'none';
                 selectedProgramNameEl.textContent = selectedName; // Update selectedProgramName display
@@ -398,7 +401,7 @@
         // Update custom price display as user types in custom price field
          customAvgWashPriceEl.addEventListener('input', () => {
              const price = parseFloat(customAvgWashPriceEl.value) || 0;
-             selectedProgramNameEl.textContent = `Custom (€${price.toFixed(2)})`;
+             selectedProgramNameEl.textContent = `Custom (${currentCurrency}${price.toFixed(2)})`;
              calculateSimulation(); // Also trigger full calculation
          });
 
@@ -482,16 +485,27 @@
             avgWashPriceEl.innerHTML += `<option value="10.00" data-name="Custom Average">Custom Average</option>`;
             // Update all currency symbols in the UI (labels, results, etc.)
             updateCurrencySymbols(config.currency);
+
+            // Set dynamic employer SS rate
+            currentEmployerSSRate = config.employerTaxRate; // Update this based on country config
+
+            // Sort and populate country selector (moved here for dynamic updates)
+            countrySelectorEl.innerHTML = ''; // Clear existing options
+            const sortedCountries = Object.values(countryConfigs).sort((a, b) => a.country.localeCompare(b.country));
+            sortedCountries.forEach(country => {
+                const option = document.createElement('option');
+                option.value = country.code;
+                option.textContent = country.country;
+                countrySelectorEl.appendChild(option);
+            });
+            // Set the selected country after populating
+            countrySelectorEl.value = currentCountry;
+
             calculateSimulation();
         }
 
         countrySelectorEl.addEventListener('change', (e) => {
             applyCountryConfig(e.target.value);
-        });
-
-        // On page load, load configs and apply default
-        loadCountryConfigs().then(() => {
-            applyCountryConfig(countrySelectorEl.value);
         });
 
         function calculateSimulation() {
@@ -507,7 +521,7 @@
 
             if (selectedName === "Custom Average") {
                 avgWashPrice = parseFloat(customAvgWashPriceEl.value) || 0;
-                selectedProgramNameDisplay = `Custom (€${avgWashPrice.toFixed(2)})`;
+                selectedProgramNameDisplay = `Custom (${currentCurrency}${avgWashPrice.toFixed(2)})`;
             } else {
                 avgWashPrice = parseFloat(avgWashPriceEl.value) || 0;
                 selectedProgramNameDisplay = selectedName;
@@ -518,9 +532,8 @@
             const avgGrossSalary = parseFloat(avgGrossSalaryEl.value) || 0;
 
             const totalGrossMonthlySalaries = numEmployees * avgGrossSalary;
-            const employerSSContribution = totalGrossMonthlySalaries * EMPLOYER_SS_RATE;
+            const employerSSContribution = totalGrossMonthlySalaries * currentEmployerSSRate; // Use dynamic rate
             const totalMonthlySalaryCosts = totalGrossMonthlySalaries + employerSSContribution;
-
 
             // Get other Fixed Costs (Monthly)
             const monthlyRent = parseFloat(monthlyRentEl.value) || 0;
@@ -530,7 +543,6 @@
             // Calculate Total Fixed Costs (Monthly and Daily)
             const totalMonthlyFixedCosts = totalMonthlySalaryCosts + monthlyRent + monthlyUtilitiesBase + monthlyInsuranceOther;
             const dailyFixedCosts = totalMonthlyFixedCosts / DAYS_IN_MONTH; // Assuming 30 days per month
-
 
             // Get and calculate Variable Costs per Car
             const waterCostPerCar = parseFloat(waterCostPerCarEl.value) || 0;
@@ -557,9 +569,11 @@
             totalVariableCostPerCarDisplayEl.textContent = `${currentCurrency}${totalVariableCostPerCar.toFixed(2)}`;
             dailyVariableCostsEl.textContent = `${currentCurrency}${dailyTotalVariableCosts.toFixed(2)}`;
 
+            // Update Salary Cost Display
             totalMonthlySalaryCostsDisplayEl.textContent = `${currentCurrency}${totalMonthlySalaryCosts.toFixed(2)}`;
             grossMonthlySalariesDisplayEl.textContent = `${currentCurrency}${totalGrossMonthlySalaries.toFixed(2)}`;
-            employerSSDisplayEl.textContent = `${currentCurrency}${employerSSContribution.toFixed(2)}`;
+            // Update Employer SS display with dynamic rate
+            employerSSDisplayEl.textContent = `${currentCurrency}${employerSSContribution.toFixed(2)} (Employer SS, ~${(currentEmployerSSRate * 100).toFixed(2)}%):`;
 
             totalDailyFixedCostsDisplayEl.textContent = `${currentCurrency}${dailyFixedCosts.toFixed(2)}`;
 
@@ -611,17 +625,20 @@
         }
 
         // Initial calculation on page load
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Load configs and apply default
+            await loadCountryConfigs(); // Ensure configs are loaded before applying
+            applyCountryConfig(countrySelectorEl.value); // Apply initial config
+
             // Initialize slider display
             carsPerHourValueEl.textContent = carsPerHourEl.value;
-
             // Ensure custom price group display is correct based on initial selection
             const selectedOption = avgWashPriceEl.selectedOptions[0];
             const selectedName = selectedOption.dataset.name;
              if (selectedName === "Custom Average") {
                 customPriceGroupEl.style.display = 'block';
                  // Set initial display for custom price if it's selected
-                 selectedProgramNameEl.textContent = `Custom (€${(parseFloat(customAvgWashPriceEl.value) || 0).toFixed(2)})`;
+                 selectedProgramNameEl.textContent = `Custom (${currentCurrency}${ (parseFloat(customAvgWashPriceEl.value) || 0).toFixed(2)})`;
             } else {
                 customPriceGroupEl.style.display = 'none';
                 // Set initial display for pre-set price
@@ -676,7 +693,14 @@
                 const scenario = {
                     operatingHours: parseFloat(operatingHoursEl.value) || 0,
                     carsPerHour: parseFloat(carsPerHourEl.value) || 0,
-                    avgWashPrice: parseFloat(avgWashPriceEl.value) || (parseFloat(customAvgWashPriceEl.value) || 0),
+                    // Dynamically get avgWashPrice based on current selection or custom input
+                    avgWashPrice: (() => {
+                        const selectedOption = avgWashPriceEl.selectedOptions[0];
+                        const selectedName = selectedOption.dataset.name;
+                        return selectedName === "Custom Average" ?
+                               parseFloat(customAvgWashPriceEl.value) || 0 :
+                               parseFloat(avgWashPriceEl.value) || 0;
+                    })(),
                     numEmployees: parseFloat(numEmployeesEl.value) || 0,
                     avgGrossSalary: parseFloat(avgGrossSalaryEl.value) || 0,
                     monthlyRent: parseFloat(monthlyRentEl.value) || 0,
@@ -688,11 +712,15 @@
                     directLaborPerCar: parseFloat(directLaborPerCarEl.value) || 0,
                     currentCountry: currentCountry,
                     currentCurrency: currentCurrency,
+                    currentEmployerSSRate: currentEmployerSSRate,
                     // Include calculated results for AI context
                     totalCarsDay: parseFloat(totalCarsDayEl.textContent) || 0,
                     dailyRevenue: parseFloat(dailyRevenueEl.textContent.replace(currentCurrency, '')) || 0,
                     dailyProfit: parseFloat(dailyProfitEl.textContent.replace(currentCurrency, '')) || 0,
                     monthlyProfit: parseFloat(monthlyProfitEl.textContent.replace(currentCurrency, '')) || 0,
+                    // Pass current HTML for more dynamic AI responses (e.g., to identify inputs)
+                    // This can be heavy, consider simplifying or adding specific element IDs
+                    // currentHtml: document.body.outerHTML // WARNING: Can be very large!
                 };
 
                 const response = await fetch('/.netlify/functions/ai-chat', {
@@ -707,7 +735,17 @@
 
                 if (response.ok) {
                     removeLoadingMessage();
-                    appendMessage(data.reply, 'assistant');
+                    const aiReply = data.reply;
+                    appendMessage(aiReply, 'assistant');
+
+                    // Check if AI suggests changes and apply them
+                    // This is a simple pattern match, more complex parsing might be needed
+                    const changes = parseAiSuggestions(aiReply);
+                    if (Object.keys(changes).length > 0) {
+                        console.log("AI suggested changes:", changes);
+                        applyAiSuggestions(changes);
+                    }
+
                 } else {
                     removeLoadingMessage();
                     appendMessage(`Error: ${data.message || 'Something went wrong.'}`, 'error');
@@ -721,6 +759,48 @@
                 chatInput.disabled = false;
                 sendMessageButton.disabled = false;
                 chatMessages.scrollTop = chatMessages.scrollHeight; // Scroll to bottom
+            }
+        }
+
+        // Function to parse AI suggestions (simple example)
+        function parseAiSuggestions(text) {
+            const suggestions = {};
+            // Example: "Set carsPerHour to 15" or "Set monthlyRent to 2500"
+            const regex = /Set (\w+) to (\d+\.?\d*)/g;
+            let match;
+            while ((match = regex.exec(text)) !== null) {
+                suggestions[match[1]] = parseFloat(match[2]);
+            }
+            return suggestions;
+        }
+
+        // Function to apply AI suggestions to simulator inputs
+        function applyAiSuggestions(changes) {
+            let applied = false;
+            for (const key in changes) {
+                const inputElement = document.getElementById(key);
+                if (inputElement) {
+                    const oldValue = inputElement.value;
+                    inputElement.value = changes[key];
+                    console.log(`Updated ${key} from ${oldValue} to ${changes[key]}`);
+                    applied = true;
+                    // Manually trigger input event for consistency
+                    inputElement.dispatchEvent(new Event('input'));
+                     // If the change is to avgWashPrice, ensure custom price group is handled
+                    if (key === 'avgWashPrice') {
+                        const customOption = Array.from(avgWashPriceEl.options).find(opt => opt.dataset.name === "Custom Average");
+                        if (customOption) {
+                            customOption.selected = true;
+                            customPriceGroupEl.style.display = 'block';
+                            customAvgWashPriceEl.value = changes[key];
+                            customAvgWashPriceEl.dispatchEvent(new Event('input'));
+                        }
+                    }
+                }
+            }
+            if (applied) {
+                calculateSimulation();
+                appendMessage("Simulator inputs updated based on AI suggestions!", 'assistant');
             }
         }
 
