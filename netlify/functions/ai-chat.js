@@ -1,4 +1,6 @@
 const { Groq } = require('groq-sdk');
+const path = require('path');
+const fs = require('fs/promises');
 
 exports.handler = async function(event, context) {
     if (event.httpMethod !== 'POST') {
@@ -20,6 +22,11 @@ exports.handler = async function(event, context) {
     try {
         const { message, scenario } = JSON.parse(event.body);
 
+        // Load AI configuration
+        const configPath = path.resolve(__dirname, 'ai_config.json');
+        const aiConfigRaw = await fs.readFile(configPath, 'utf8');
+        const aiConfig = JSON.parse(aiConfigRaw);
+
         const groq = new Groq({ apiKey: GROP_API_KEY });
 
         const chatCompletion = await groq.chat.completions.create({
@@ -33,9 +40,9 @@ exports.handler = async function(event, context) {
                     content: message,
                 }
             ],
-            model: "llama3-8b-8192", // Using Llama 3.3 as requested
-            temperature: 0.7,
-            max_tokens: 500,
+            model: aiConfig.model, // Use model from config
+            temperature: aiConfig.temperature, // Use temperature from config
+            max_tokens: aiConfig.max_tokens,   // Use max_tokens from config
         });
 
         return {
