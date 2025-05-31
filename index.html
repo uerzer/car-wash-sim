@@ -626,7 +626,7 @@
             // Disable input and button
             chatInput.disabled = true;
             sendMessageButton.disabled = true;
-            appendMessage("Thinking...", 'assistant loading');
+            appendMessage("Thinking...", 'ai-loading');
 
             try {
                 // Capture current simulator state
@@ -683,13 +683,13 @@
 
         function appendMessage(text, sender) {
             const msgDiv = document.createElement('div');
-            msgDiv.classList.add('message', `${sender}-message`, 'p-2', 'my-1', 'rounded-lg');
+            msgDiv.classList.add('message', 'p-2', 'my-1', 'rounded-lg');
 
             if (sender === 'user') {
                 msgDiv.classList.add('bg-blue-500', 'text-white', 'self-end');
             } else if (sender === 'assistant') {
                 msgDiv.classList.add('bg-gray-200', 'text-gray-800', 'self-start');
-            } else if (sender === 'assistant loading') {
+            } else if (sender === 'ai-loading') {
                  msgDiv.classList.add('bg-gray-100', 'text-gray-500', 'italic', 'self-start', 'loading-message');
             } else if (sender === 'error') {
                 msgDiv.classList.add('bg-red-100', 'text-red-700', 'self-start');
