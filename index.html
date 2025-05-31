@@ -628,6 +628,11 @@
         document.addEventListener('DOMContentLoaded', async () => {
             // Load configs and apply default
             await loadCountryConfigs(); // Ensure configs are loaded before applying
+            
+            // Set initial country to US
+            const countrySelectorEl = document.getElementById('countrySelector');
+            countrySelectorEl.value = 'US'; 
+
             applyCountryConfig(countrySelectorEl.value); // Apply initial config
 
             // Initialize slider display
