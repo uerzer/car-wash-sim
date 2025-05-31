@@ -108,6 +108,49 @@
             min-height: 2.5em;
             display: block;
         }
+        /* AI Chat Widget Specific Styles */
+        #aiChatWidget {
+            display: none; /* Hidden by default, shown by JS */
+            transition: all 0.3s ease-in-out;
+            right: 1.5rem; /* Equivalent to p-4 */
+            bottom: 1.5rem; /* Equivalent to p-4 */
+        }
+        #openChatButton {
+            transition: all 0.3s ease-in-out;
+            right: 1.5rem; /* Equivalent to p-4 */
+            bottom: 1.5rem; /* Equivalent to p-4 */
+        }
+        #chatMessages {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem; /* Space between messages */
+        }
+        .message {
+            max-width: 85%;
+            word-wrap: break-word;
+        }
+        .user-message {
+            background-color: #3B82F6; /* blue-500 */
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 0.25rem; /* rounded-sm on one corner */
+        }
+        .assistant-message {
+            background-color: #E5E7EB; /* gray-200 */
+            color: #1F2937; /* gray-800 */
+            align-self: flex-start;
+            border-bottom-left-radius: 0.25rem; /* rounded-sm on one corner */
+        }
+        .loading-message,
+        .error-message {
+            background-color: #FEF3C7; /* yellow-100 */
+            color: #92400E; /* yellow-800 */
+            align-self: flex-start;
+        }
+        .error-message {
+            background-color: #FEE2E2; /* red-100 */
+            color: #991B1B; /* red-800 */
+        }
     </style>
 </head>
 <body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
