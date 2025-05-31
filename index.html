@@ -359,29 +359,41 @@
 
         // Placeholder: Load country configs (simulate fetch)
         async function loadCountryConfigs() {
-            // In production, fetch from '/config/countries.json'
-            countryConfigs = {
-                'PT': {
-                    country: 'Portugal', currency: '€', minWage: 820, employerTaxRate: 0.2375, defaultRent: 2000, defaultUtilities: 300, defaultInsurance: 200,
-                    defaultPerCar: { water: 0.30, soap: 0.50, electricity: 0.40, labor: 0.00 }, defaultWashPrices: [7, 9, 12, 15]
-                },
-                'US': {
-                    country: 'United States', currency: '$', minWage: 1500, employerTaxRate: 0.0765, defaultRent: 2500, defaultUtilities: 400, defaultInsurance: 250,
-                    defaultPerCar: { water: 0.50, soap: 0.60, electricity: 0.45, labor: 0.00 }, defaultWashPrices: [10, 12, 15, 20]
-                },
-                'UK': {
-                    country: 'United Kingdom', currency: '£', minWage: 1600, employerTaxRate: 0.138, defaultRent: 1800, defaultUtilities: 350, defaultInsurance: 180,
-                    defaultPerCar: { water: 0.35, soap: 0.55, electricity: 0.42, labor: 0.00 }, defaultWashPrices: [8, 10, 13, 16]
-                },
-                'DE': {
-                    country: 'Germany', currency: '€', minWage: 1981, employerTaxRate: 0.20, defaultRent: 2200, defaultUtilities: 320, defaultInsurance: 210,
-                    defaultPerCar: { water: 0.32, soap: 0.52, electricity: 0.41, labor: 0.00 }, defaultWashPrices: [9, 11, 14, 17]
-                },
-                'FR': {
-                    country: 'France', currency: '€', minWage: 1766, employerTaxRate: 0.25, defaultRent: 2100, defaultUtilities: 330, defaultInsurance: 205,
-                    defaultPerCar: { water: 0.33, soap: 0.53, electricity: 0.43, labor: 0.00 }, defaultWashPrices: [8, 10, 13, 16]
-                }
-            };
+            try {
+                const response = await fetch('config/countries.json');
+                const data = await response.json();
+                countryConfigs = {};
+                data.forEach(cfg => {
+                    countryConfigs[cfg.code] = cfg;
+                });
+            } catch (e) {
+                // Fallback to Portugal config if fetch fails
+                countryConfigs = {
+                    'PT': {
+                        country: 'Portugal', currency: '€', minWage: 820, employerTaxRate: 0.2375, defaultRent: 2000, defaultUtilities: 300, defaultInsurance: 200,
+                        defaultPerCar: { water: 0.30, soap: 0.50, electricity: 0.40, labor: 0.00 }, defaultWashPrices: [7, 9, 12, 15]
+                    }
+                };
+            }
+        }
+
+        function updateCurrencySymbols(symbol) {
+            // Update all labels and placeholders with the correct currency symbol
+            // Fixed Costs
+            document.querySelector('label[for="avgGrossSalary"]').innerHTML = `Avg Gross Monthly Salary per Employee (${symbol}): (Min Wage: ${symbol}${countryConfigs[currentCountry].minWage})`;
+            document.querySelector('label[for="monthlyRent"]').innerHTML = `Rent (${symbol}):`;
+            document.querySelector('label[for="monthlyUtilitiesBase"]').innerHTML = `Utilities (Base) (${symbol}):`;
+            document.querySelector('label[for="monthlyInsuranceOther"]').innerHTML = `Insurance/Other Fixed Costs (${symbol}):`;
+            // Variable Costs
+            document.querySelector('label[for="waterCostPerCar"]').innerHTML = `Water (${symbol}):`;
+            document.querySelector('label[for="soapCostPerCar"]').innerHTML = `Soap/Chemicals (${symbol}):`;
+            document.querySelector('label[for="electricityCostPerCar"]').innerHTML = `Electricity (Direct) (${symbol}):`;
+            document.querySelector('label[for="directLaborPerCar"]').innerHTML = `Direct Labor (Optional, Per Car) (${symbol}):`;
+            // Custom price input
+            document.querySelector('label[for="customAvgWashPrice"]').innerHTML = `Enter Custom Average Price (${symbol}):`;
+            // Section titles
+            document.querySelector('h3.section-title.mb-4.mt-8').innerHTML = `Monthly Fixed Costs (${symbol})`;
+            document.querySelectorAll('h3.section-title.mb-4.mt-8')[1].innerHTML = `Variable Costs Per Car (${symbol})`;
         }
 
         function applyCountryConfig(countryCode) {
@@ -407,7 +419,7 @@
             });
             avgWashPriceEl.innerHTML += `<option value="10.00" data-name="Custom Average">Custom Average</option>`;
             // Update all currency symbols in the UI (labels, results, etc.)
-            // (Add logic here as needed)
+            updateCurrencySymbols(config.currency);
             calculateSimulation();
         }
 
@@ -478,20 +490,20 @@
             // Display Results
             selectedProgramNameEl.textContent = selectedProgramNameDisplay;
             totalCarsDayEl.textContent = totalCarsDay.toFixed(0);
-            dailyRevenueEl.textContent = `€${dailyRevenue.toFixed(2)}`;
+            dailyRevenueEl.textContent = `${currentCurrency}${dailyRevenue.toFixed(2)}`;
 
-            totalVariableCostPerCarDisplayEl.textContent = `€${totalVariableCostPerCar.toFixed(2)}`;
-            dailyVariableCostsEl.textContent = `€${dailyTotalVariableCosts.toFixed(2)}`;
+            totalVariableCostPerCarDisplayEl.textContent = `${currentCurrency}${totalVariableCostPerCar.toFixed(2)}`;
+            dailyVariableCostsEl.textContent = `${currentCurrency}${dailyTotalVariableCosts.toFixed(2)}`;
 
-            totalMonthlySalaryCostsDisplayEl.textContent = `€${totalMonthlySalaryCosts.toFixed(2)}`;
-            grossMonthlySalariesDisplayEl.textContent = `€${totalGrossMonthlySalaries.toFixed(2)}`;
-            employerSSDisplayEl.textContent = `€${employerSSContribution.toFixed(2)}`;
+            totalMonthlySalaryCostsDisplayEl.textContent = `${currentCurrency}${totalMonthlySalaryCosts.toFixed(2)}`;
+            grossMonthlySalariesDisplayEl.textContent = `${currentCurrency}${totalGrossMonthlySalaries.toFixed(2)}`;
+            employerSSDisplayEl.textContent = `${currentCurrency}${employerSSContribution.toFixed(2)}`;
 
-            totalDailyFixedCostsDisplayEl.textContent = `€${dailyFixedCosts.toFixed(2)}`;
+            totalDailyFixedCostsDisplayEl.textContent = `${currentCurrency}${dailyFixedCosts.toFixed(2)}`;
 
-            dailyProfitEl.textContent = `€${dailyProfit.toFixed(2)}`;
-            monthlyRevenueEl.textContent = `€${monthlyRevenue.toFixed(2)}`;
-            monthlyProfitEl.textContent = `€${monthlyProfit.toFixed(2)}`;
+            dailyProfitEl.textContent = `${currentCurrency}${dailyProfit.toFixed(2)}`;
+            monthlyRevenueEl.textContent = `${currentCurrency}${monthlyRevenue.toFixed(2)}`;
+            monthlyProfitEl.textContent = `${currentCurrency}${monthlyProfit.toFixed(2)}`;
 
             // Update profit/loss colors by changing class on the parent <p> of the span
             dailyProfitTextEl.classList.remove('profit', 'loss'); // Remove previous state classes
