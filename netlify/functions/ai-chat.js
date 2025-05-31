@@ -1,6 +1,8 @@
 const { Groq } = require('groq-sdk');
-const path = require('path');
-const fs = require('fs/promises');
+// const path = require('path'); // No longer needed
+// const fs = require('fs/promises'); // No longer needed
+
+const aiConfig = require('./ai_config.json'); // Directly require the JSON config
 
 exports.handler = async function(event, context) {
     if (event.httpMethod !== 'POST') {
@@ -22,10 +24,10 @@ exports.handler = async function(event, context) {
     try {
         const { message, scenario } = JSON.parse(event.body);
 
-        // Load AI configuration
-        const configPath = path.resolve(__dirname, 'ai_config.json');
-        const aiConfigRaw = await fs.readFile(configPath, 'utf8');
-        const aiConfig = JSON.parse(aiConfigRaw);
+        // // Load AI configuration (Previous code, no longer needed)
+        // const configPath = path.resolve(__dirname, 'ai_config.json');
+        // const aiConfigRaw = await fs.readFile(configPath, 'utf8');
+        // const aiConfig = JSON.parse(aiConfigRaw);
 
         const groq = new Groq({ apiKey: GROP_API_KEY });
 
