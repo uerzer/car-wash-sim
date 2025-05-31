@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Car Wash Business Simulator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .input-group {
+            margin-bottom: 1rem;
+        }
+        .input-group label {
+            display: block;
+            margin-bottom: 0.25rem;
+            font-weight: 500;
+            color: #4A5568; /* gray-700 */
+        }
+        .input-group input, .input-group select {
+            width: 100%;
+            padding: 0.5rem 0.75rem;
+            border: 1px solid #CBD5E0; /* gray-300 */
+            border-radius: 0.375rem; /* rounded-md */
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        }
+        .input-group input:focus, .input-group select:focus {
+            outline: none;
+            border-color: #4299E1; /* blue-500 */
+            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.5);
+        }
+        .results-card {
+            background-color: #F9FAFB; /* gray-50 */
+            padding: 1.5rem;
+            border-radius: 0.5rem; /* rounded-lg */
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            margin-top: 1rem; /* Adjusted margin */
+        }
+        .results-card h3 {
+            font-size: 1.25rem; /* text-xl */
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #1F2937; /* gray-800 */
+        }
+        .results-card p {
+            font-size: 1rem; /* text-base */
+            color: #374151; /* gray-700 */
+            margin-bottom: 0.5rem;
+        }
+        .results-card p span {
+            font-weight: 600;
+            /* Default span color, overridden by specific classes below */
+             color: #10B981; /* green-500 - Used for positive things like revenue */
+        }
+         .results-card p.cost span, .results-card p.calculated-cost span {
+            color: #EF4444; /* red-500 - Used for costs */
+        }
+         .results-card p.calculated-cost-label {
+            font-style: italic;
+            color: #6B7280; /* gray-500 */
+         }
+        .results-card p.profit span { /* Specific profit color (blue) */
+            color: #3B82F6; /* blue-500 */
+        }
+        .results-card p.loss span { /* Specific loss color (red) */
+            color: #EF4444; /* red-500 */
+        }
+        .slider-container {
+            margin-bottom: 1rem;
+        }
+        .slider-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #4A5568; /* gray-700 */
+        }
+        .section-title {
+            font-size: 1.125rem; /* text-lg */
+            font-weight: 600;
+            color: #374151; /* gray-700 */
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+            padding-bottom: 0.25rem;
+            border-bottom: 1px solid #E5E7EB; /* gray-200 */
+        }
+         .calculated-cost-details {
+            margin-top: 0.5rem;
+            padding-left: 1rem;
+            font-size: 0.9rem;
+            color: #5A67D8; /* indigo-600 */
+         }
+         .calculated-cost-details p {
+             margin-bottom: 0.2rem;
+         }
+         .calculated-cost-details span {
+             font-weight: 500;
+             color: #5A67D8; /* indigo-600 */
+         }
+        /* Remove margin-bottom for input-group inside variable cost grid */
+        .variable-costs-grid .input-group {
+            margin-bottom: 0;
+        }
+        /* Make all labels in variable cost grid the same height for alignment */
+        .variable-costs-grid label {
+            min-height: 2.5em;
+            display: block;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
+    <div class="bg-white p-6 sm:p-8 rounded-xl shadow-2xl w-full max-w-4xl">
+        <header class="mb-8 text-center">
+            <h1 class="text-3xl font-bold text-gray-800">Advanced Car Wash Business Simulator</h1>
+            <p class="text-gray-600 mt-2">Estimate potential revenue and costs with detailed expense inputs.</p>
+            <div class="mt-4 flex justify-center items-center gap-2">
+                <label for="countrySelector" class="font-medium text-gray-700">Country:</label>
+                <select id="countrySelector" class="border border-gray-300 rounded px-2 py-1">
+                    <option value="PT">Portugal</option>
+                    <option value="US">United States</option>
+                    <option value="UK">United Kingdom</option>
+                    <option value="DE">Germany</option>
+                    <option value="FR">France</option>
+                    <!-- Add more countries as needed -->
+                </select>
+            </div>
+        </header>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6 md:items-stretch">
+            <div class="flex flex-col h-full">
+                <h3 class="section-title mb-4 mt-0">Operational Inputs</h3>
+                <div class="input-group">
+                    <label for="operatingHours">Operating Hours per Day:</label>
+                    <input type="number" id="operatingHours" value="10" min="1" max="24">
+                </div>
+
+                <div class="slider-container">
+                    <div class="slider-label">
+                        <label for="carsPerHour">Average Cars per Hour:</label>
+                        <span id="carsPerHourValue">10</span>
+                    </div>
+                    <input type="range" id="carsPerHour" min="1" max="50" value="10" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                </div>
+
+                <div class="input-group">
+                    <label for="avgWashPrice">Average Price per Wash (€):</label>
+                    <select id="avgWashPrice">
+                        <option value="7.00" data-name="Bronze Wash">Bronze Wash (€7.00)</option>
+                        <option value="9.00" data-name="Silver Wash" selected>Silver Wash (€9.00)</option>
+                        <option value="12.00" data-name="Gold Wash">Gold Wash (€12.00)</option>
+                        <option value="15.00" data-name="Platinum Wash">Platinum Wash (€15.00)</option>
+                        <option value="10.00" data-name="Custom Average">Custom Average</option>
+                    </select>
+                </div>
+                 <div class="input-group" id="customPriceGroup" style="display:none;">
+                    <label for="customAvgWashPrice">Enter Custom Average Price (€):</label>
+                    <input type="number" id="customAvgWashPrice" value="10.00" step="0.50" min="1">
+                </div>
+
+                <h3 class="section-title mb-4 mt-8">Monthly Fixed Costs (€)</h3>
+                <div class="grid grid-cols-2 gap-4">
+                     <div class="input-group col-span-2"> <!-- Span two columns -->
+                        <label for="numEmployees">Number of Fixed Employees:</label>
+                        <input type="number" id="numEmployees" value="4" min="0" step="1">
+                    </div>
+                    <div class="input-group col-span-2"> <!-- Span two columns -->
+                        <label for="avgGrossSalary">Avg Gross Monthly Salary per Employee (€): (Min Wage 2024: €820)</label>
+                        <input type="number" id="avgGrossSalary" value="900.00" min="820.00" step="10.00">
+                    </div>
+                    <div class="input-group">
+                        <label for="monthlyRent">Rent:</label>
+                        <input type="number" id="monthlyRent" value="2000" min="0" step="100">
+                    </div>
+                    <div class="input-group">
+                        <label for="monthlyUtilitiesBase">Utilities (Base):</label>
+                        <input type="number" id="monthlyUtilitiesBase" value="300" min="0" step="50">
+                    </div>
+                     <div class="input-group col-span-2"> <!-- Span two columns -->
+                        <label for="monthlyInsuranceOther">Insurance/Other Fixed Costs:</label>
+                        <input type="number" id="monthlyInsuranceOther" value="200" min="0" step="50">
+                    </div>
+                </div>
+
+                <h3 class="section-title mb-4 mt-8">Variable Costs Per Car (€)</h3>
+                <div class="variable-costs-grid grid grid-cols-1 sm:grid-cols-2 gap-4 items-stretch">
+                    <div class="input-group flex flex-col justify-end h-full">
+                        <label for="waterCostPerCar">Water:</label>
+                        <input type="number" id="waterCostPerCar" value="0.30" min="0" step="0.05">
+                    </div>
+                    <div class="input-group flex flex-col justify-end h-full">
+                        <label for="soapCostPerCar">Soap/Chemicals:</label>
+                        <input type="number" id="soapCostPerCar" value="0.50" min="0" step="0.05">
+                    </div>
+                    <div class="input-group flex flex-col justify-end h-full">
+                        <label for="electricityCostPerCar">Electricity (Direct):</label>
+                        <input type="number" id="electricityCostPerCar" value="0.40" min="0" step="0.05">
+                    </div>
+                    <div class="input-group flex flex-col justify-end h-full">
+                        <label for="directLaborPerCar">Direct Labor (Optional, Per Car):</label>
+                        <input type="number" id="directLaborPerCar" value="0.00" min="0" step="0.05"> <!-- Default to 0 as fixed staff handle base tasks -->
+                    </div>
+                </div>
+                <div class="mt-8 text-center">
+                    <button id="calculateButton" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition duration-150 ease-in-out w-full md:w-auto">
+                        Recalculate Simulation
+                    </button>
+                </div>
+            </div>
+
+            <div class="results-card flex flex-col h-full justify-between mt-4 md:mt-0">
+                <h3>Simulation Results (Estimates)</h3>
+                <p>Selected Wash Program: <strong id="selectedProgramName" class="text-indigo-600">Silver Wash</strong></p>
+                <p>Total Cars per Day: <strong id="totalCarsDay" class="text-indigo-600">0</strong></p>
+                <hr class="my-4 border-gray-300">
+                <p>Estimated Daily Revenue: <span id="dailyRevenue">€0.00</span></p>
+                <hr class="my-2 border-gray-200">
+                <p class="calculated-cost-label">Calculated Total Variable Cost per Car: <span id="totalVariableCostPerCarDisplay" class="font-bold">€0.00</span></p>
+                <p class="cost">Estimated Daily Variable Costs (Total): <span id="dailyVariableCosts">€0.00</span></p>
+                <hr class="my-2 border-gray-200">
+
+                <p class="calculated-cost-label">Calculated Monthly Salary Costs (Employer): <span id="totalMonthlySalaryCostsDisplay" class="font-bold">€0.00</span></p>
+                 <div class="calculated-cost-details">
+                     <p>Gross Salaries (Monthly): <span id="grossMonthlySalariesDisplay">€0.00</span></p>
+                     <p>Employer SS (Monthly, ~23.75%): <span id="employerSSDisplay">€0.00</span></p>
+                 </div>
+
+                <p class="calculated-cost-label mt-4">Calculated Total Daily Fixed Costs: <span id="totalDailyFixedCostsDisplay" class="font-bold">€0.00</span></p>
+                 <div class="calculated-cost-details">
+                     <p>Includes: Monthly Salary Costs, Rent, Utilities, Insurance/Other</p>
+                 </div>
+
+                <p id="dailyProfitText" class="mt-4">Estimated Daily Profit: <span id="dailyProfit">€0.00</span></p>
+                <hr class="my-4 border-gray-300">
+                <p>Estimated Monthly Revenue (30 days): <span id="monthlyRevenue">€0.00</span></p>
+                <p id="monthlyProfitText">Estimated Monthly Profit (30 days): <span id="monthlyProfit">€0.00</span></p>
+                <hr class="my-4 border-gray-300">
+                <div id="busynessIndicator" class="mt-4 p-3 rounded-md text-center">
+                    <p class="font-semibold">Operational Load:</p>
+                    <p id="busynessText" class="text-lg font-bold">Calculating...</p>
+                </div>
+            </div>
+        </div>
+        <footer class="mt-8 pt-4 border-t border-gray-200">
+            <p class="text-xs text-gray-500 text-center">
+                Disclaimer: This is a simplified model for illustrative purposes only. Actual results will vary based on numerous factors including exact tax rates, additional benefits, maintenance, unexpected costs, seasonality, etc. Assumes 30 days per month for fixed cost calculations. Employer Social Security rate is an approximation (General Regime). Assumes a theoretical maximum capacity for the busyness indicator based on ~10 mins per car per bay and 3 bays.
+            </p>
+        </footer>
+    </div>
+
+    <script>
+        // Constants for Portuguese employer costs (Approximate)
+        const EMPLOYER_SS_RATE = 0.2375; // ~23.75% for general regime
+        const DAYS_IN_MONTH = 30;
+
+        // DOM Elements - General Operation
+        const operatingHoursEl = document.getElementById('operatingHours');
+        const carsPerHourEl = document.getElementById('carsPerHour');
+        const carsPerHourValueEl = document.getElementById('carsPerHourValue');
+        const avgWashPriceEl = document.getElementById('avgWashPrice');
+        const customAvgWashPriceEl = document.getElementById('customAvgWashPrice');
+        const customPriceGroupEl = document.getElementById('customPriceGroup');
+
+        // DOM Elements - Fixed Costs Inputs
+        const numEmployeesEl = document.getElementById('numEmployees');
+        const avgGrossSalaryEl = document.getElementById('avgGrossSalary');
+        const monthlyRentEl = document.getElementById('monthlyRent');
+        const monthlyUtilitiesBaseEl = document.getElementById('monthlyUtilitiesBase');
+        const monthlyInsuranceOtherEl = document.getElementById('monthlyInsuranceOther');
+
+        // DOM Elements - Variable Costs Inputs
+        const waterCostPerCarEl = document.getElementById('waterCostPerCar');
+        const soapCostPerCarEl = document.getElementById('soapCostPerCar');
+        const electricityCostPerCarEl = document.getElementById('electricityCostPerCar');
+        const directLaborPerCarEl = document.getElementById('directLaborPerCar');
+
+        const calculateButton = document.getElementById('calculateButton'); // Button element
+
+        // Result Displays
+        const selectedProgramNameEl = document.getElementById('selectedProgramName');
+        const totalCarsDayEl = document.getElementById('totalCarsDay');
+        const dailyRevenueEl = document.getElementById('dailyRevenue');
+
+        const totalVariableCostPerCarDisplayEl = document.getElementById('totalVariableCostPerCarDisplay');
+        const dailyVariableCostsEl = document.getElementById('dailyVariableCosts');
+
+        const totalMonthlySalaryCostsDisplayEl = document.getElementById('totalMonthlySalaryCostsDisplay');
+        const grossMonthlySalariesDisplayEl = document.getElementById('grossMonthlySalariesDisplay');
+        const employerSSDisplayEl = document.getElementById('employerSSDisplay');
+
+        const totalDailyFixedCostsDisplayEl = document.getElementById('totalDailyFixedCostsDisplay');
+
+        const dailyProfitTextEl = document.getElementById('dailyProfitText'); // Target the <p> element for profit/loss class
+        const dailyProfitEl = document.getElementById('dailyProfit'); // Target the <span> for the value
+
+        const monthlyProfitTextEl = document.getElementById('monthlyProfitText'); // Target the <p> element for profit/loss class
+        const monthlyProfitEl = document.getElementById('monthlyProfit'); // Target the <span> for the value
+        const monthlyRevenueEl = document.getElementById('monthlyRevenue');
+
+        const busynessIndicatorEl = document.getElementById('busynessIndicator');
+        const busynessTextEl = document.getElementById('busynessText');
+
+        // Consolidate all input elements that should trigger recalculation on 'input'
+        // (except select which uses 'change')
+        const allRecalculatingInputEls = [
+            operatingHoursEl, carsPerHourEl, customAvgWashPriceEl,
+            numEmployeesEl, avgGrossSalaryEl, monthlyRentEl, monthlyUtilitiesBaseEl, monthlyInsuranceOtherEl,
+            waterCostPerCarEl, soapCostPerCarEl, electricityCostPerCarEl, directLaborPerCarEl
+        ];
+
+        // Event Listeners
+
+        // Slider uses 'input' for immediate feedback
+        carsPerHourEl.addEventListener('input', () => {
+            carsPerHourValueEl.textContent = carsPerHourEl.value;
+            calculateSimulation();
+        });
+
+        // Select dropdown uses 'change'
+        avgWashPriceEl.addEventListener('change', () => {
+            const selectedOption = avgWashPriceEl.selectedOptions[0];
+            const selectedName = selectedOption.dataset.name;
+
+            if (selectedName === "Custom Average") {
+                customPriceGroupEl.style.display = 'block';
+                 // Update selectedProgramName display immediately
+                selectedProgramNameEl.textContent = `Custom (€${(parseFloat(customAvgWashPriceEl.value) || 0).toFixed(2)})`;
+            } else {
+                customPriceGroupEl.style.display = 'none';
+                selectedProgramNameEl.textContent = selectedName; // Update selectedProgramName display
+            }
+            calculateSimulation();
+        });
+
+        // Update custom price display as user types in custom price field
+         customAvgWashPriceEl.addEventListener('input', () => {
+             const price = parseFloat(customAvgWashPriceEl.value) || 0;
+             selectedProgramNameEl.textContent = `Custom (€${price.toFixed(2)})`;
+             calculateSimulation(); // Also trigger full calculation
+         });
+
+
+        // All other number inputs use 'input' for immediate feedback
+        allRecalculatingInputEls.forEach(el => {
+             // Avoid adding duplicate listeners or adding to elements already handled
+             if (el !== carsPerHourEl && el !== customAvgWashPriceEl && el !== avgWashPriceEl) {
+                el.addEventListener('input', calculateSimulation);
+             }
+        });
+
+        // The button click listener exists but is less critical as inputs auto-update
+        calculateButton.addEventListener('click', calculateSimulation);
+
+        const countrySelectorEl = document.getElementById('countrySelector');
+        let countryConfigs = {};
+        let currentCountry = 'PT';
+        let currentCurrency = '€';
+
+        // Placeholder: Load country configs (simulate fetch)
+        async function loadCountryConfigs() {
+            // In production, fetch from '/config/countries.json'
+            countryConfigs = {
+                'PT': {
+                    country: 'Portugal', currency: '€', minWage: 820, employerTaxRate: 0.2375, defaultRent: 2000, defaultUtilities: 300, defaultInsurance: 200,
+                    defaultPerCar: { water: 0.30, soap: 0.50, electricity: 0.40, labor: 0.00 }, defaultWashPrices: [7, 9, 12, 15]
+                },
+                'US': {
+                    country: 'United States', currency: '$', minWage: 1500, employerTaxRate: 0.0765, defaultRent: 2500, defaultUtilities: 400, defaultInsurance: 250,
+                    defaultPerCar: { water: 0.50, soap: 0.60, electricity: 0.45, labor: 0.00 }, defaultWashPrices: [10, 12, 15, 20]
+                },
+                'UK': {
+                    country: 'United Kingdom', currency: '£', minWage: 1600, employerTaxRate: 0.138, defaultRent: 1800, defaultUtilities: 350, defaultInsurance: 180,
+                    defaultPerCar: { water: 0.35, soap: 0.55, electricity: 0.42, labor: 0.00 }, defaultWashPrices: [8, 10, 13, 16]
+                },
+                'DE': {
+                    country: 'Germany', currency: '€', minWage: 1981, employerTaxRate: 0.20, defaultRent: 2200, defaultUtilities: 320, defaultInsurance: 210,
+                    defaultPerCar: { water: 0.32, soap: 0.52, electricity: 0.41, labor: 0.00 }, defaultWashPrices: [9, 11, 14, 17]
+                },
+                'FR': {
+                    country: 'France', currency: '€', minWage: 1766, employerTaxRate: 0.25, defaultRent: 2100, defaultUtilities: 330, defaultInsurance: 205,
+                    defaultPerCar: { water: 0.33, soap: 0.53, electricity: 0.43, labor: 0.00 }, defaultWashPrices: [8, 10, 13, 16]
+                }
+            };
+        }
+
+        function applyCountryConfig(countryCode) {
+            const config = countryConfigs[countryCode];
+            if (!config) return;
+            currentCountry = countryCode;
+            currentCurrency = config.currency;
+            // Update all input fields and labels with config defaults
+            document.getElementById('avgGrossSalary').value = config.minWage;
+            document.getElementById('monthlyRent').value = config.defaultRent;
+            document.getElementById('monthlyUtilitiesBase').value = config.defaultUtilities;
+            document.getElementById('monthlyInsuranceOther').value = config.defaultInsurance;
+            document.getElementById('waterCostPerCar').value = config.defaultPerCar.water;
+            document.getElementById('soapCostPerCar').value = config.defaultPerCar.soap;
+            document.getElementById('electricityCostPerCar').value = config.defaultPerCar.electricity;
+            document.getElementById('directLaborPerCar').value = config.defaultPerCar.labor;
+            // Update wash price options
+            const avgWashPriceEl = document.getElementById('avgWashPrice');
+            avgWashPriceEl.innerHTML = '';
+            config.defaultWashPrices.forEach((price, idx) => {
+                const name = ['Bronze', 'Silver', 'Gold', 'Platinum'][idx] || `Option ${idx+1}`;
+                avgWashPriceEl.innerHTML += `<option value="${price.toFixed(2)}" data-name="${name} Wash">${name} Wash (${config.currency}${price.toFixed(2)})</option>`;
+            });
+            avgWashPriceEl.innerHTML += `<option value="10.00" data-name="Custom Average">Custom Average</option>`;
+            // Update all currency symbols in the UI (labels, results, etc.)
+            // (Add logic here as needed)
+            calculateSimulation();
+        }
+
+        countrySelectorEl.addEventListener('change', (e) => {
+            applyCountryConfig(e.target.value);
+        });
+
+        // On page load, load configs and apply default
+        loadCountryConfigs().then(() => {
+            applyCountryConfig(countrySelectorEl.value);
+        });
+
+        function calculateSimulation() {
+            // Get operational input values
+            const operatingHours = parseFloat(operatingHoursEl.value) || 0;
+            const carsPerHour = parseFloat(carsPerHourEl.value) || 0;
+
+            let avgWashPrice;
+            let selectedProgramNameDisplay;
+
+            const selectedOption = avgWashPriceEl.selectedOptions[0];
+            const selectedName = selectedOption.dataset.name;
+
+            if (selectedName === "Custom Average") {
+                avgWashPrice = parseFloat(customAvgWashPriceEl.value) || 0;
+                selectedProgramNameDisplay = `Custom (€${avgWashPrice.toFixed(2)})`;
+            } else {
+                avgWashPrice = parseFloat(avgWashPriceEl.value) || 0;
+                selectedProgramNameDisplay = selectedName;
+            }
+
+            // Calculate Salary Costs (Monthly)
+            const numEmployees = parseFloat(numEmployeesEl.value) || 0;
+            const avgGrossSalary = parseFloat(avgGrossSalaryEl.value) || 0;
+
+            const totalGrossMonthlySalaries = numEmployees * avgGrossSalary;
+            const employerSSContribution = totalGrossMonthlySalaries * EMPLOYER_SS_RATE;
+            const totalMonthlySalaryCosts = totalGrossMonthlySalaries + employerSSContribution;
+
+
+            // Get other Fixed Costs (Monthly)
+            const monthlyRent = parseFloat(monthlyRentEl.value) || 0;
+            const monthlyUtilitiesBase = parseFloat(monthlyUtilitiesBaseEl.value) || 0;
+            const monthlyInsuranceOther = parseFloat(monthlyInsuranceOtherEl.value) || 0;
+
+            // Calculate Total Fixed Costs (Monthly and Daily)
+            const totalMonthlyFixedCosts = totalMonthlySalaryCosts + monthlyRent + monthlyUtilitiesBase + monthlyInsuranceOther;
+            const dailyFixedCosts = totalMonthlyFixedCosts / DAYS_IN_MONTH; // Assuming 30 days per month
+
+
+            // Get and calculate Variable Costs per Car
+            const waterCostPerCar = parseFloat(waterCostPerCarEl.value) || 0;
+            const soapCostPerCar = parseFloat(soapCostPerCarEl.value) || 0;
+            const electricityCostPerCar = parseFloat(electricityCostPerCarEl.value) || 0;
+            const directLaborPerCar = parseFloat(directLaborPerCarEl.value) || 0;
+            const totalVariableCostPerCar = waterCostPerCar + soapCostPerCar + electricityCostPerCar + directLaborPerCar;
+
+            // Core Calculations
+            const totalCarsDay = operatingHours * carsPerHour;
+            const dailyRevenue = totalCarsDay * avgWashPrice;
+            const dailyTotalVariableCosts = totalCarsDay * totalVariableCostPerCar;
+            const dailyTotalCosts = dailyTotalVariableCosts + dailyFixedCosts;
+            const dailyProfit = dailyRevenue - dailyTotalCosts;
+
+            const monthlyRevenue = dailyRevenue * DAYS_IN_MONTH; // Simple multiplication for estimate
+            const monthlyProfit = dailyProfit * DAYS_IN_MONTH; // Simple multiplication for estimate
+
+            // Display Results
+            selectedProgramNameEl.textContent = selectedProgramNameDisplay;
+            totalCarsDayEl.textContent = totalCarsDay.toFixed(0);
+            dailyRevenueEl.textContent = `€${dailyRevenue.toFixed(2)}`;
+
+            totalVariableCostPerCarDisplayEl.textContent = `€${totalVariableCostPerCar.toFixed(2)}`;
+            dailyVariableCostsEl.textContent = `€${dailyTotalVariableCosts.toFixed(2)}`;
+
+            totalMonthlySalaryCostsDisplayEl.textContent = `€${totalMonthlySalaryCosts.toFixed(2)}`;
+            grossMonthlySalariesDisplayEl.textContent = `€${totalGrossMonthlySalaries.toFixed(2)}`;
+            employerSSDisplayEl.textContent = `€${employerSSContribution.toFixed(2)}`;
+
+            totalDailyFixedCostsDisplayEl.textContent = `€${dailyFixedCosts.toFixed(2)}`;
+
+            dailyProfitEl.textContent = `€${dailyProfit.toFixed(2)}`;
+            monthlyRevenueEl.textContent = `€${monthlyRevenue.toFixed(2)}`;
+            monthlyProfitEl.textContent = `€${monthlyProfit.toFixed(2)}`;
+
+            // Update profit/loss colors by changing class on the parent <p> of the span
+            dailyProfitTextEl.classList.remove('profit', 'loss'); // Remove previous state classes
+             if (dailyProfit < 0) {
+                dailyProfitTextEl.classList.add('loss'); // Add 'loss' class if negative
+            } else {
+                dailyProfitTextEl.classList.add('profit'); // Add 'profit' class if positive or zero
+            }
+
+            monthlyProfitTextEl.classList.remove('profit', 'loss'); // Remove previous state classes
+            if (monthlyProfit < 0) {
+                monthlyProfitTextEl.classList.add('loss'); // Add 'loss' class if negative
+            } else {
+                monthlyProfitTextEl.classList.add('profit'); // Add 'profit' class if positive or zero
+            }
+
+
+            // Busyness Indicator - Simplified estimation
+            // Assumption: IMO Lisbon has multiple bays (e.g., 3 or 4).
+            // Let's assume 3 bays, average cycle time ~10 minutes per car per bay.
+            const theoreticalCycleTimePerBayMinutes = 10;
+            const theoreticalMaxCarsPerBayPerHour = 60 / theoreticalCycleTimePerBayMinutes; // 6 cars/hour per bay
+            const assumedNumberOfBays = 3; // Estimate based on typical IMO setup / photos
+            const totalTheoreticalMaxCarsPerHour = theoreticalMaxCarsPerBayPerHour * assumedNumberOfBays;
+
+            // Adjust the busyness thresholds based on this total capacity
+            if (totalCarsDay === 0 || carsPerHour === 0) {
+                busynessTextEl.textContent = "Idle";
+                busynessIndicatorEl.className = "mt-4 p-3 rounded-md text-center bg-gray-200 text-gray-600";
+            } else if (carsPerHour <= totalTheoreticalMaxCarsPerHour * 0.2) { // Light load
+                busynessTextEl.textContent = "Light";
+                busynessIndicatorEl.className = "mt-4 p-3 rounded-md text-center bg-green-100 text-green-700";
+            } else if (carsPerHour <= totalTheoreticalMaxCarsPerHour * 0.5) { // Moderate load
+                 busynessTextEl.textContent = "Moderate";
+                busynessIndicatorEl.className = "mt-4 p-3 rounded-md text-center bg-yellow-100 text-yellow-700";
+            } else if (carsPerHour <= totalTheoreticalMaxCarsPerHour * 0.9) { // High load, near capacity
+                 busynessTextEl.textContent = "Busy";
+                busynessIndicatorEl.className = "mt-4 p-3 rounded-md text-center bg-orange-100 text-orange-700";
+            } else { // Exceeding nominal capacity
+                busynessTextEl.textContent = `Very Busy (Potential Queues) - Est. Capacity: ${totalTheoreticalMaxCarsPerHour.toFixed(1)} cars/hr`;
+                busynessIndicatorEl.className = "mt-4 p-3 rounded-md text-center bg-red-100 text-red-700";
+            }
+        }
+
+        // Initial calculation on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize slider display
+            carsPerHourValueEl.textContent = carsPerHourEl.value;
+
+            // Ensure custom price group display is correct based on initial selection
+            const selectedOption = avgWashPriceEl.selectedOptions[0];
+            const selectedName = selectedOption.dataset.name;
+             if (selectedName === "Custom Average") {
+                customPriceGroupEl.style.display = 'block';
+                 // Set initial display for custom price if it's selected
+                 selectedProgramNameEl.textContent = `Custom (€${(parseFloat(customAvgWashPriceEl.value) || 0).toFixed(2)})`;
+            } else {
+                customPriceGroupEl.style.display = 'none';
+                // Set initial display for pre-set price
+                 selectedProgramNameEl.textContent = selectedName;
+            }
+
+            // Run the initial calculation
+            calculateSimulation();
+        });
+    </script>
+</body>
+</html>

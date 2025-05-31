@@ -1,0 +1,62 @@
+[
+  {
+    "code": "PT",
+    "country": "Portugal",
+    "currency": "€",
+    "minWage": 820,
+    "employerTaxRate": 0.2375,
+    "defaultRent": 2000,
+    "defaultUtilities": 300,
+    "defaultInsurance": 200,
+    "defaultPerCar": { "water": 0.30, "soap": 0.50, "electricity": 0.40, "labor": 0.00 },
+    "defaultWashPrices": [7, 9, 12, 15]
+  },
+  {
+    "code": "US",
+    "country": "United States",
+    "currency": "$",
+    "minWage": 1500,
+    "employerTaxRate": 0.0765,
+    "defaultRent": 2500,
+    "defaultUtilities": 400,
+    "defaultInsurance": 250,
+    "defaultPerCar": { "water": 0.50, "soap": 0.60, "electricity": 0.45, "labor": 0.00 },
+    "defaultWashPrices": [10, 12, 15, 20]
+  },
+  {
+    "code": "UK",
+    "country": "United Kingdom",
+    "currency": "£",
+    "minWage": 1600,
+    "employerTaxRate": 0.138,
+    "defaultRent": 1800,
+    "defaultUtilities": 350,
+    "defaultInsurance": 180,
+    "defaultPerCar": { "water": 0.35, "soap": 0.55, "electricity": 0.42, "labor": 0.00 },
+    "defaultWashPrices": [8, 10, 13, 16]
+  },
+  {
+    "code": "DE",
+    "country": "Germany",
+    "currency": "€",
+    "minWage": 1981,
+    "employerTaxRate": 0.20,
+    "defaultRent": 2200,
+    "defaultUtilities": 320,
+    "defaultInsurance": 210,
+    "defaultPerCar": { "water": 0.32, "soap": 0.52, "electricity": 0.41, "labor": 0.00 },
+    "defaultWashPrices": [9, 11, 14, 17]
+  },
+  {
+    "code": "FR",
+    "country": "France",
+    "currency": "€",
+    "minWage": 1766,
+    "employerTaxRate": 0.25,
+    "defaultRent": 2100,
+    "defaultUtilities": 330,
+    "defaultInsurance": 205,
+    "defaultPerCar": { "water": 0.33, "soap": 0.53, "electricity": 0.43, "labor": 0.00 },
+    "defaultWashPrices": [8, 10, 13, 16]
+  }
+] 
