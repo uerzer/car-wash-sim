@@ -249,6 +249,25 @@
         </footer>
     </div>
 
+    <div id="aiChatWidget" class="fixed bottom-4 right-4 bg-white rounded-lg shadow-xl border border-gray-200 z-50 overflow-hidden w-80 h-96 flex flex-col">
+        <div class="bg-blue-600 text-white p-3 font-semibold flex justify-between items-center">
+            AI Assistant
+            <button id="closeChat" class="text-white hover:text-gray-200 focus:outline-none">✖</button>
+        </div>
+        <div id="chatMessages" class="flex-1 p-3 overflow-y-auto text-sm bg-gray-50">
+            <!-- Chat messages will be appended here -->
+            <div class="text-center text-gray-500 py-2">Ask me anything about your car wash simulation!</div>
+        </div>
+        <div class="border-t border-gray-200 p-3 flex items-center">
+            <input type="text" id="chatInput" class="flex-1 border border-gray-300 rounded-lg px-3 py-2 mr-2 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Type your message...">
+            <button id="sendMessage" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold">Send</button>
+        </div>
+    </div>
+
+    <button id="openChatButton" class="fixed bottom-4 right-4 bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-full shadow-lg z-50">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path></svg>
+    </button>
+
     <script>
         // Constants for Portuguese employer costs (Approximate)
         const EMPLOYER_SS_RATE = 0.2375; // ~23.75% for general regime
@@ -569,6 +588,124 @@
             // Run the initial calculation
             calculateSimulation();
         });
+
+        // New DOM elements for AI Chat
+        const aiChatWidget = document.getElementById('aiChatWidget');
+        const openChatButton = document.getElementById('openChatButton');
+        const closeChatButton = document.getElementById('closeChat');
+        const chatMessages = document.getElementById('chatMessages');
+        const chatInput = document.getElementById('chatInput');
+        const sendMessageButton = document.getElementById('sendMessage');
+
+        // --- AI Chat Logic ---
+
+        openChatButton.addEventListener('click', () => {
+            aiChatWidget.style.display = 'flex';
+            openChatButton.style.display = 'none';
+        });
+
+        closeChatButton.addEventListener('click', () => {
+            aiChatWidget.style.display = 'none';
+            openChatButton.style.display = 'block';
+        });
+
+        sendMessageButton.addEventListener('click', sendChatMessage);
+        chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendChatMessage();
+            }
+        });
+
+        async function sendChatMessage() {
+            const message = chatInput.value.trim();
+            if (!message) return;
+
+            chatInput.value = '';
+            appendMessage(message, 'user');
+
+            // Disable input and button
+            chatInput.disabled = true;
+            sendMessageButton.disabled = true;
+            appendMessage("Thinking...", 'assistant loading');
+
+            try {
+                // Capture current simulator state
+                const scenario = {
+                    operatingHours: parseFloat(operatingHoursEl.value) || 0,
+                    carsPerHour: parseFloat(carsPerHourEl.value) || 0,
+                    avgWashPrice: parseFloat(avgWashPriceEl.value) || (parseFloat(customAvgWashPriceEl.value) || 0),
+                    numEmployees: parseFloat(numEmployeesEl.value) || 0,
+                    avgGrossSalary: parseFloat(avgGrossSalaryEl.value) || 0,
+                    monthlyRent: parseFloat(monthlyRentEl.value) || 0,
+                    monthlyUtilitiesBase: parseFloat(monthlyUtilitiesBaseEl.value) || 0,
+                    monthlyInsuranceOther: parseFloat(monthlyInsuranceOtherEl.value) || 0,
+                    waterCostPerCar: parseFloat(waterCostPerCarEl.value) || 0,
+                    soapCostPerCar: parseFloat(soapCostPerCarEl.value) || 0,
+                    electricityCostPerCar: parseFloat(electricityCostPerCarEl.value) || 0,
+                    directLaborPerCar: parseFloat(directLaborPerCarEl.value) || 0,
+                    currentCountry: currentCountry,
+                    currentCurrency: currentCurrency,
+                    // Include calculated results for AI context
+                    totalCarsDay: parseFloat(totalCarsDayEl.textContent) || 0,
+                    dailyRevenue: parseFloat(dailyRevenueEl.textContent.replace(currentCurrency, '')) || 0,
+                    dailyProfit: parseFloat(dailyProfitEl.textContent.replace(currentCurrency, '')) || 0,
+                    monthlyProfit: parseFloat(monthlyProfitEl.textContent.replace(currentCurrency, '')) || 0,
+                };
+
+                const response = await fetch('/.netlify/functions/ai-chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ message, scenario }),
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    removeLoadingMessage();
+                    appendMessage(data.reply, 'assistant');
+                } else {
+                    removeLoadingMessage();
+                    appendMessage(`Error: ${data.message || 'Something went wrong.'}`, 'error');
+                }
+
+            } catch (error) {
+                console.error('Frontend AI Chat Error:', error);
+                removeLoadingMessage();
+                appendMessage(`Network error: ${error.message}. Please try again.`, 'error');
+            } finally {
+                chatInput.disabled = false;
+                sendMessageButton.disabled = false;
+                chatMessages.scrollTop = chatMessages.scrollHeight; // Scroll to bottom
+            }
+        }
+
+        function appendMessage(text, sender) {
+            const msgDiv = document.createElement('div');
+            msgDiv.classList.add('message', `${sender}-message`, 'p-2', 'my-1', 'rounded-lg');
+
+            if (sender === 'user') {
+                msgDiv.classList.add('bg-blue-500', 'text-white', 'self-end');
+            } else if (sender === 'assistant') {
+                msgDiv.classList.add('bg-gray-200', 'text-gray-800', 'self-start');
+            } else if (sender === 'assistant loading') {
+                 msgDiv.classList.add('bg-gray-100', 'text-gray-500', 'italic', 'self-start', 'loading-message');
+            } else if (sender === 'error') {
+                msgDiv.classList.add('bg-red-100', 'text-red-700', 'self-start');
+            }
+
+            msgDiv.textContent = text;
+            chatMessages.appendChild(msgDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function removeLoadingMessage() {
+            const loadingMessage = chatMessages.querySelector('.loading-message');
+            if (loadingMessage) {
+                loadingMessage.remove();
+            }
+        }
     </script>
 </body>
 </html>
