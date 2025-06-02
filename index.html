@@ -151,6 +151,19 @@
             background-color: #FEE2E2; /* red-100 */
             color: #991B1B; /* red-800 */
         }
+        /* Responsive adjustments for AI Chat Widget */
+        @media (min-width: 768px) { /* md breakpoint and up */
+            #aiChatWidget {
+                width: 400px; /* Wider on desktop */
+                height: 500px; /* Taller on desktop */
+            }
+        }
+        @media (min-width: 1024px) { /* lg breakpoint and up */
+            #aiChatWidget {
+                width: 450px; /* Even wider on larger desktops */
+                height: 550px; /* Even taller */
+            }
+        }
     </style>
 </head>
 <body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
@@ -809,7 +822,24 @@
             }
         }
 
-        function appendMessage(text, sender) {
+        // Basic Markdown to HTML conversion for AI responses
+        function convertMarkdownToHtml(text) {
+            // Convert bold (**text** or __text__)
+            text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            text = text.replace(/__(.*?)__/g, '<strong>$1</strong>');
+            // Convert italics (*text* or _text_)
+            text = text.replace(/\*(.*?)\*/g, '<em>$1</em>');
+            text = text.replace(/_(.*?)_/g, '<em>$1</em>');
+            // Convert newlines to <br> for basic paragraphs
+            text = text.replace(/\n/g, '<br>');
+            // Convert list items (simple - item or * item) to basic <p> for now
+            text = text.replace(/^- (.*)/gm, '&bull; $1<br>'); // Bullet points
+            text = text.replace(/^\* (.*)/gm, '&bull; $1<br>');
+            return text;
+        }
+
+        // Original appendMessage logic before the override
+        function _appendMessageCore(text, sender) {
             const msgDiv = document.createElement('div');
             msgDiv.classList.add('message', 'p-2', 'my-1', 'rounded-lg');
 
@@ -820,13 +850,25 @@
             } else if (sender === 'ai-loading') {
                  msgDiv.classList.add('bg-gray-100', 'text-gray-500', 'italic', 'self-start', 'loading-message');
             } else if (sender === 'error') {
-                msgDiv.classList.add('bg-red-100', 'text-red-700', 'self-start');
+                msgDiv.classList.add('bg-red-100', 'text-red-700', 'self-start', 'error-message'); // Added error-message class
             }
-
             msgDiv.textContent = text;
             chatMessages.appendChild(msgDiv);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
         }
+
+        // Override appendMessage to use markdown conversion for assistant messages
+        const appendMessage = function(text, sender) {
+            if (sender === 'assistant') {
+                // Create a div for the message and set its innerHTML
+                const msgDiv = document.createElement('div');
+                msgDiv.classList.add('message', 'p-2', 'my-1', 'rounded-lg', 'assistant-message');
+                msgDiv.innerHTML = convertMarkdownToHtml(text);
+                chatMessages.appendChild(msgDiv);
+            } else {
+                _appendMessageCore(text, sender); // Use the core function for other types
+            }
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        };
 
         function removeLoadingMessage() {
             const loadingMessage = chatMessages.querySelector('.loading-message');
