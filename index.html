@@ -258,11 +258,6 @@
                         <input type="number" id="directLaborPerCar" value="0.00" min="0" step="0.05"> <!-- Default to 0 as fixed staff handle base tasks -->
                     </div>
                 </div>
-                <div class="mt-8 text-center">
-                    <button id="calculateButton" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition duration-150 ease-in-out w-full md:w-auto">
-                        Recalculate Simulation
-                    </button>
-                </div>
             </div>
 
             <div class="results-card flex flex-col h-full justify-between mt-4 md:mt-0">
@@ -428,7 +423,7 @@
         });
 
         // The button click listener exists but is less critical as inputs auto-update
-        calculateButton.addEventListener('click', calculateSimulation);
+        // calculateButton.addEventListener('click', calculateSimulation); // Commented out or removed
 
         const countrySelectorEl = document.getElementById('countrySelector');
         let countryConfigs = {};
