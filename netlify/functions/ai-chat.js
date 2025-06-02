@@ -54,7 +54,7 @@ ${JSON.stringify(scenario, null, 2)}
 - directLaborPerCar
 
 **How to suggest a change:**
-- To change a variable, output a line in this exact format: `Set [elementId] to [newValue]` (e.g., `Set carsPerHour to 15`).
+- To change a variable, output a line in this exact format: \`Set [elementId] to [newValue]\` (e.g., \`Set carsPerHour to 15\`).
 - You may output multiple such lines if you have several suggestions.
 - Only use these lines for actionable changes. For all other advice, use normal markdown.
 
@@ -73,8 +73,8 @@ ${JSON.stringify(scenario, null, 2)}
 - Reducing staff costs
 - Increasing price per wash
 
-Set avgGrossSalary to 850
-Set avgWashPrice to 10
+\`Set avgGrossSalary to 850\`
+\`Set avgWashPrice to 10\`
 
 **Always be clear, concise, and actionable.**`
                 },
