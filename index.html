@@ -205,143 +205,110 @@
                 </select>
             </div>
         </header>
-
-        <!-- Auth Modal (hidden by default) -->
-        <div id="authModal" class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50" style="display:none;">
-            <div class="bg-white rounded-lg shadow-xl p-8 max-w-sm w-full relative">
-                <button id="closeAuthModal" class="absolute top-2 right-2 text-gray-400 hover:text-gray-700">✖</button>
-                <h2 class="text-xl font-bold mb-4 text-center">Sign In / Create Account</h2>
-                <input id="email" type="email" placeholder="Email" class="border rounded px-2 py-1 w-full mb-2" />
-                <input id="password" type="password" placeholder="Password" class="border rounded px-2 py-1 w-full mb-2" />
-                <div class="flex gap-2 mt-2">
-                    <button onclick="signUp()" class="bg-blue-500 text-white px-3 py-1 rounded w-1/2">Sign Up</button>
-                    <button onclick="signIn()" class="bg-green-500 text-white px-3 py-1 rounded w-1/2">Sign In</button>
-                </div>
-                <button onclick="signOut()" class="bg-gray-400 text-white px-3 py-1 rounded w-full mt-2">Sign Out</button>
-                <div id="auth-status" class="text-sm mt-2 text-center"></div>
+        <!-- Step 1: Setup Form -->
+        <form id="simSetupForm" class="space-y-4">
+            <div class="input-group">
+                <label for="operatingHours">Operating Hours per Day:</label>
+                <input type="number" id="operatingHours" value="10" min="1" max="24">
             </div>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6 md:items-stretch">
-            <div class="flex flex-col h-full">
-                <h3 class="section-title mb-4 mt-0">Operational Inputs</h3>
+            <div class="input-group">
+                <label for="carsPerHour">Average Cars per Hour:</label>
+                <input type="range" id="carsPerHour" min="1" max="50" value="10" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                <div class="text-right text-xs text-gray-500">Value: <span id="carsPerHourValue">10</span></div>
+            </div>
+            <div class="input-group">
+                <label for="avgWashPrice">Average Price per Wash:</label>
+                <select id="avgWashPrice">
+                    <option value="7.00" data-name="Bronze Wash">Bronze Wash</option>
+                    <option value="9.00" data-name="Silver Wash" selected>Silver Wash</option>
+                    <option value="12.00" data-name="Gold Wash">Gold Wash</option>
+                    <option value="15.00" data-name="Platinum Wash">Platinum Wash</option>
+                    <option value="10.00" data-name="Custom Average">Custom Average</option>
+                </select>
+            </div>
+            <div class="input-group" id="customPriceGroup" style="display:none;">
+                <label for="customAvgWashPrice">Enter Custom Average Price:</label>
+                <input type="number" id="customAvgWashPrice" value="10.00" step="0.50" min="1">
+            </div>
+            <h3 class="section-title mb-2 mt-4">Monthly Fixed Costs</h3>
+            <div class="grid grid-cols-2 gap-4">
+                <div class="input-group col-span-2">
+                    <label for="numEmployees">Number of Fixed Employees:</label>
+                    <input type="number" id="numEmployees" value="4" min="0" step="1">
+                </div>
+                <div class="input-group col-span-2">
+                    <label for="avgGrossSalary">Avg Gross Monthly Salary per Employee:</label>
+                    <input type="number" id="avgGrossSalary" value="900.00" min="820.00" step="10.00">
+                </div>
                 <div class="input-group">
-                    <label for="operatingHours">Operating Hours per Day:</label>
-                    <input type="number" id="operatingHours" value="10" min="1" max="24">
+                    <label for="monthlyRent">Rent:</label>
+                    <input type="number" id="monthlyRent" value="2000" min="0" step="100">
                 </div>
-
-                <div class="slider-container">
-                    <div class="slider-label">
-                        <label for="carsPerHour">Average Cars per Hour:</label>
-                        <span id="carsPerHourValue">10</span>
-                    </div>
-                    <input type="range" id="carsPerHour" min="1" max="50" value="10" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
-                </div>
-
                 <div class="input-group">
-                    <label for="avgWashPrice">Average Price per Wash (€):</label>
-                    <select id="avgWashPrice">
-                        <option value="7.00" data-name="Bronze Wash">Bronze Wash (€7.00)</option>
-                        <option value="9.00" data-name="Silver Wash" selected>Silver Wash (€9.00)</option>
-                        <option value="12.00" data-name="Gold Wash">Gold Wash (€12.00)</option>
-                        <option value="15.00" data-name="Platinum Wash">Platinum Wash (€15.00)</option>
-                        <option value="10.00" data-name="Custom Average">Custom Average</option>
-                    </select>
+                    <label for="monthlyUtilitiesBase">Utilities (Base):</label>
+                    <input type="number" id="monthlyUtilitiesBase" value="300" min="0" step="50">
                 </div>
-                 <div class="input-group" id="customPriceGroup" style="display:none;">
-                    <label for="customAvgWashPrice">Enter Custom Average Price (€):</label>
-                    <input type="number" id="customAvgWashPrice" value="10.00" step="0.50" min="1">
-                </div>
-
-                <h3 class="section-title mb-4 mt-8">Monthly Fixed Costs (€)</h3>
-                <div class="grid grid-cols-2 gap-4">
-                     <div class="input-group col-span-2"> <!-- Span two columns -->
-                        <label for="numEmployees">Number of Fixed Employees:</label>
-                        <input type="number" id="numEmployees" value="4" min="0" step="1">
-                    </div>
-                    <div class="input-group col-span-2"> <!-- Span two columns -->
-                        <label for="avgGrossSalary">Avg Gross Monthly Salary per Employee (€): (Min Wage 2024: €820)</label>
-                        <input type="number" id="avgGrossSalary" value="900.00" min="820.00" step="10.00">
-                    </div>
-                    <div class="input-group">
-                        <label for="monthlyRent">Rent:</label>
-                        <input type="number" id="monthlyRent" value="2000" min="0" step="100">
-                    </div>
-                    <div class="input-group">
-                        <label for="monthlyUtilitiesBase">Utilities (Base):</label>
-                        <input type="number" id="monthlyUtilitiesBase" value="300" min="0" step="50">
-                    </div>
-                     <div class="input-group col-span-2"> <!-- Span two columns -->
-                        <label for="monthlyInsuranceOther">Insurance/Other Fixed Costs:</label>
-                        <input type="number" id="monthlyInsuranceOther" value="200" min="0" step="50">
-                    </div>
-                </div>
-
-                <h3 class="section-title mb-4 mt-8">Variable Costs Per Car (€)</h3>
-                <div class="variable-costs-grid grid grid-cols-1 sm:grid-cols-2 gap-4 items-stretch">
-                    <div class="input-group flex flex-col justify-end h-full">
-                        <label for="waterCostPerCar">Water:</label>
-                        <input type="number" id="waterCostPerCar" value="0.30" min="0" step="0.05">
-                    </div>
-                    <div class="input-group flex flex-col justify-end h-full">
-                        <label for="soapCostPerCar">Soap/Chemicals:</label>
-                        <input type="number" id="soapCostPerCar" value="0.50" min="0" step="0.05">
-                    </div>
-                    <div class="input-group flex flex-col justify-end h-full">
-                        <label for="electricityCostPerCar">Electricity (Direct):</label>
-                        <input type="number" id="electricityCostPerCar" value="0.40" min="0" step="0.05">
-                    </div>
-                    <div class="input-group flex flex-col justify-end h-full">
-                        <label for="directLaborPerCar">Direct Labor (Optional, Per Car):</label>
-                        <input type="number" id="directLaborPerCar" value="0.00" min="0" step="0.05"> <!-- Default to 0 as fixed staff handle base tasks -->
-                    </div>
+                <div class="input-group col-span-2">
+                    <label for="monthlyInsuranceOther">Insurance/Other Fixed Costs:</label>
+                    <input type="number" id="monthlyInsuranceOther" value="200" min="0" step="50">
                 </div>
             </div>
-
-            <div class="results-card flex flex-col h-full justify-between mt-4 md:mt-0">
-                <h3>Simulation Results (Estimates)</h3>
-                <p>Selected Wash Program: <strong id="selectedProgramName" class="text-indigo-600">Silver Wash</strong></p>
-                <p>Total Cars per Day: <strong id="totalCarsDay" class="text-indigo-600">0</strong></p>
-                <hr class="my-4 border-gray-300">
-                <p>Estimated Daily Revenue: <span id="dailyRevenue">€0.00</span></p>
-                <hr class="my-2 border-gray-200">
-                <p class="calculated-cost-label">Calculated Total Variable Cost per Car: <span id="totalVariableCostPerCarDisplay" class="font-bold">€0.00</span></p>
-                <p class="cost">Estimated Daily Variable Costs (Total): <span id="dailyVariableCosts">€0.00</span></p>
-                <hr class="my-2 border-gray-200">
-                <!-- Premium Save Scenario Button -->
-                <button id="saveScenarioBtn" class="flex items-center justify-center gap-2 bg-gray-200 hover:bg-yellow-200 text-gray-700 font-semibold px-4 py-2 rounded-lg mt-2 mb-2 cursor-pointer relative group">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11c0-1.104.896-2 2-2s2 .896 2 2-.896 2-2 2-2-.896-2-2zm0 0V7m0 4v4m0 0h4m-4 0H8" /></svg>
-                  Save Scenario <span class="ml-1 text-xs bg-yellow-400 text-white rounded px-2 py-0.5">Premium</span>
-                  <span class="absolute left-full ml-2 w-40 bg-black text-white text-xs rounded px-2 py-1 opacity-0 group-hover:opacity-100 transition">Create an account to save and load scenarios!</span>
-                </button>
-
-                <p class="calculated-cost-label">Calculated Monthly Salary Costs (Employer): <span id="totalMonthlySalaryCostsDisplay" class="font-bold">€0.00</span></p>
-                 <div class="calculated-cost-details">
-                     <p>Gross Salaries (Monthly): <span id="grossMonthlySalariesDisplay">€0.00</span></p>
-                     <p>Employer SS (Monthly, ~23.75%): <span id="employerSSDisplay">€0.00</span></p>
-                 </div>
-
-                <p class="calculated-cost-label mt-4">Calculated Total Daily Fixed Costs: <span id="totalDailyFixedCostsDisplay" class="font-bold">€0.00</span></p>
-                 <div class="calculated-cost-details">
-                     <p>Includes: Monthly Salary Costs, Rent, Utilities, Insurance/Other</p>
-                 </div>
-
-                <p id="dailyProfitText" class="mt-4">Estimated Daily Profit: <span id="dailyProfit">€0.00</span></p>
-                <hr class="my-4 border-gray-300">
-                <p>Estimated Monthly Revenue (30 days): <span id="monthlyRevenue">€0.00</span></p>
-                <p id="monthlyProfitText">Estimated Monthly Profit (30 days): <span id="monthlyProfit">€0.00</span></p>
-                <hr class="my-4 border-gray-300">
-                <div id="busynessIndicator" class="mt-4 p-3 rounded-md text-center">
-                    <p class="font-semibold">Operational Load:</p>
-                    <p id="busynessText" class="text-lg font-bold">Calculating...</p>
+            <h3 class="section-title mb-2 mt-4">Variable Costs Per Car</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 items-stretch">
+                <div class="input-group flex flex-col justify-end h-full">
+                    <label for="waterCostPerCar">Water:</label>
+                    <input type="number" id="waterCostPerCar" value="0.30" min="0" step="0.05">
+                </div>
+                <div class="input-group flex flex-col justify-end h-full">
+                    <label for="soapCostPerCar">Soap/Chemicals:</label>
+                    <input type="number" id="soapCostPerCar" value="0.50" min="0" step="0.05">
+                </div>
+                <div class="input-group flex flex-col justify-end h-full">
+                    <label for="electricityCostPerCar">Electricity (Direct):</label>
+                    <input type="number" id="electricityCostPerCar" value="0.40" min="0" step="0.05">
+                </div>
+                <div class="input-group flex flex-col justify-end h-full">
+                    <label for="directLaborPerCar">Direct Labor (Optional, Per Car):</label>
+                    <input type="number" id="directLaborPerCar" value="0.00" min="0" step="0.05">
+                </div>
+            </div>
+            <button type="submit" id="calculateButton" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-lg mt-4">Calculate</button>
+        </form>
+        <!-- Step 2: Results Modal -->
+        <div id="resultsModal" class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50" style="display:none;">
+            <div class="bg-white rounded-lg shadow-xl p-6 max-w-lg w-full relative">
+                <button id="closeResultsModal" class="absolute top-2 right-2 text-gray-400 hover:text-gray-700">✖</button>
+                <div class="flex items-center justify-between mb-2">
+                    <h2 class="text-lg font-bold">Simulation Results</h2>
+                    <span id="trialMeter" class="text-xs bg-gray-200 text-gray-700 rounded px-2 py-0.5 ml-2">2 free scenarios left</span>
+                </div>
+                <div id="resultsContent"></div>
+                <div class="flex gap-2 mt-4">
+                    <button id="saveScenarioBtn" class="flex-1 flex items-center justify-center gap-2 bg-gray-200 hover:bg-yellow-200 text-gray-700 font-semibold px-4 py-2 rounded-lg cursor-pointer relative group">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11c0-1.104.896-2 2-2s2 .896 2 2-.896 2-2 2-2-.896-2-2zm0 0V7m0 4v4m0 0h4m-4 0H8" /></svg>
+                        Save Scenario <span class="ml-1 text-xs bg-yellow-400 text-white rounded px-2 py-0.5">Premium</span>
+                    </button>
+                    <button id="downloadPdfBtn" class="flex-1 flex items-center justify-center gap-2 bg-gray-200 hover:bg-blue-200 text-gray-700 font-semibold px-4 py-2 rounded-lg cursor-pointer relative group">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+                        Download PDF <span class="ml-1 text-xs bg-blue-400 text-white rounded px-2 py-0.5">Premium</span>
+                    </button>
                 </div>
             </div>
         </div>
-        <footer class="mt-8 pt-4 border-t border-gray-200">
-            <p class="text-xs text-gray-500 text-center">
-                Disclaimer: This is a simplified model for illustrative purposes only. Actual results will vary based on numerous factors including exact tax rates, additional benefits, maintenance, unexpected costs, seasonality, etc. Assumes 30 days per month for fixed cost calculations. Employer Social Security rate is an approximation (General Regime). Assumes a theoretical maximum capacity for the busyness indicator based on ~10 mins per car per bay and 3 bays.
-            </p>
-        </footer>
+        <!-- Paywall Modal -->
+        <div id="paywallModal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50" style="display:none;">
+            <div class="bg-white rounded-lg shadow-xl p-8 max-w-sm w-full relative text-center">
+                <button id="closePaywallModal" class="absolute top-2 right-2 text-gray-400 hover:text-gray-700">✖</button>
+                <h2 class="text-xl font-bold mb-2">Upgrade to Pro</h2>
+                <p class="mb-4">Unlock unlimited scenarios, save/load, PDF export, and more. Perfect for business owners and serious planners.</p>
+                <div class="mb-4">
+                    <span class="text-2xl font-bold text-blue-600">$9/mo</span>
+                    <span class="text-xs text-gray-500 ml-2">Cancel anytime</span>
+                </div>
+                <button class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-lg mb-2">Upgrade Now</button>
+                <div class="text-xs text-gray-400">Have a coupon or need a team plan? <a href="#" class="underline">Contact us</a></div>
+            </div>
+        </div>
     </div>
 
     <div id="aiChatWidget" class="fixed bottom-4 right-4 bg-white rounded-lg shadow-xl border border-gray-200 z-50 overflow-hidden w-80 h-96 flex flex-col">
@@ -966,6 +933,51 @@
         openAuthModalBtn.addEventListener('click', () => { authModal.style.display = 'flex'; });
         closeAuthModalBtn.addEventListener('click', () => { authModal.style.display = 'none'; });
         window.addEventListener('click', (e) => { if (e.target === authModal) authModal.style.display = 'none'; });
+
+        // Two-step flow logic
+        let trialCount = 2;
+        const simSetupForm = document.getElementById('simSetupForm');
+        const resultsModal = document.getElementById('resultsModal');
+        const resultsContent = document.getElementById('resultsContent');
+        const trialMeter = document.getElementById('trialMeter');
+        const paywallModal = document.getElementById('paywallModal');
+        const closeResultsModal = document.getElementById('closeResultsModal');
+        const closePaywallModal = document.getElementById('closePaywallModal');
+        const downloadPdfBtn = document.getElementById('downloadPdfBtn');
+
+        simSetupForm.addEventListener('submit', function(e) {
+          e.preventDefault();
+          if (trialCount > 0) {
+            showResultsModal();
+            trialCount--;
+            updateTrialMeter();
+          } else {
+            showPaywallModal();
+          }
+        });
+        function showResultsModal() {
+          resultsModal.style.display = 'flex';
+          // Generate and display results (reuse your calculation logic)
+          resultsContent.innerHTML = generateResultsHtml();
+        }
+        function updateTrialMeter() {
+          if (trialCount > 0) {
+            trialMeter.textContent = `${trialCount} free scenario${trialCount === 1 ? '' : 's'} left`;
+            trialMeter.classList.remove('bg-red-400', 'text-white');
+            trialMeter.classList.add('bg-gray-200', 'text-gray-700');
+          } else {
+            trialMeter.textContent = 'Trial ended';
+            trialMeter.classList.remove('bg-gray-200', 'text-gray-700');
+            trialMeter.classList.add('bg-red-400', 'text-white');
+          }
+        }
+        function showPaywallModal() {
+          paywallModal.style.display = 'flex';
+        }
+        closeResultsModal.addEventListener('click', () => { resultsModal.style.display = 'none'; });
+        closePaywallModal.addEventListener('click', () => { paywallModal.style.display = 'none'; });
+        saveScenarioBtn.addEventListener('click', showPaywallModal);
+        downloadPdfBtn.addEventListener('click', showPaywallModal);
     </script>
 </body>
 </html>
