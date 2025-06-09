@@ -183,144 +183,142 @@
           .text-2xl { font-size: 1.2rem !important; }
           .text-base { font-size: 1rem !important; }
           .text-sm { font-size: 0.95rem !important; }
+          #resultsModal .max-w-lg { max-width: 100vw !important; }
+          #resultsModal .bg-white {
+            max-height: 100vh !important;
+            height: 100vh !important;
+            width: 100vw !important;
+            border-radius: 0 !important;
+            position: fixed !important;
+            top: 0; left: 0;
+            overflow-y: auto;
+            z-index: 1000;
+          }
+          .main-calculator-container { margin-bottom: 120px !important; }
         }
+        .main-calculator-container { margin-bottom: 80px; }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 </head>
 <body class="bg-gray-100 min-h-screen flex items-center justify-center p-2 sm:p-4">
     <!-- Top-right Sign In Button -->
     <button id="openAuthModal" class="fixed top-3 right-3 bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg font-semibold shadow z-30 text-sm">Sign In / Create Account</button>
-    <div class="bg-white p-3 sm:p-6 rounded-xl shadow-2xl w-full max-w-4xl mt-2 sm:mt-6 relative">
-        <header class="mb-4 sm:mb-8 text-center">
-            <h1 class="text-2xl sm:text-3xl font-bold text-gray-800 leading-tight mb-1 sm:mb-2">Advanced Car Wash Business Simulator</h1>
-            <p class="text-gray-600 text-sm sm:text-base">Estimate potential revenue and costs with detailed expense inputs.</p>
-            <div class="mt-2 sm:mt-4 flex justify-center items-center gap-2">
-                <label for="countrySelector" class="font-medium text-gray-700 text-sm sm:text-base">Country:</label>
-                <select id="countrySelector" class="border border-gray-300 rounded px-2 py-1 text-sm sm:text-base">
-                    <option value="PT">Portugal</option>
-                    <option value="US">United States</option>
-                    <option value="UK">United Kingdom</option>
-                    <option value="DE">Germany</option>
-                    <option value="FR">France</option>
-                </select>
-            </div>
-        </header>
-        <!-- Step 1: Setup Form -->
-        <form id="simSetupForm" class="space-y-4">
-            <div class="input-group">
-                <label for="operatingHours">Operating Hours per Day:</label>
-                <input type="number" id="operatingHours" value="10" min="1" max="24">
-            </div>
-            <div class="input-group">
-                <label for="carsPerHour">Average Cars per Hour:</label>
-                <input type="range" id="carsPerHour" min="1" max="50" value="10" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+    <div class="bg-white p-2 sm:p-4 rounded-xl shadow-2xl w-full max-w-2xl mt-2 sm:mt-4 relative main-calculator-container flex flex-col md:flex-row gap-2 md:gap-6 items-stretch justify-between">
+        <form id="simSetupForm" class="flex-1 grid grid-cols-2 gap-2 md:gap-4 items-start content-start text-sm">
+            <div class="col-span-2 flex flex-col gap-1">
+                <label for="operatingHours" class="font-medium text-gray-700">Operating Hours/Day</label>
+                <input type="number" id="operatingHours" value="10" min="1" max="24" class="rounded border px-2 py-1">
+                </div>
+            <div class="col-span-2 flex flex-col gap-1">
+                <label for="carsPerHour" class="font-medium text-gray-700">Avg Cars/Hour</label>
+                <input type="range" id="carsPerHour" min="1" max="50" value="10" class="w-full">
                 <div class="text-right text-xs text-gray-500">Value: <span id="carsPerHourValue">10</span></div>
-            </div>
-            <div class="input-group">
-                <label for="avgWashPrice">Average Price per Wash:</label>
-                <select id="avgWashPrice">
+                    </div>
+            <div class="col-span-2 flex flex-col gap-1">
+                <label for="avgWashPrice" class="font-medium text-gray-700">Avg Price/Wash</label>
+                <select id="avgWashPrice" class="rounded border px-2 py-1">
                     <option value="7.00" data-name="Bronze Wash">Bronze Wash</option>
                     <option value="9.00" data-name="Silver Wash" selected>Silver Wash</option>
                     <option value="12.00" data-name="Gold Wash">Gold Wash</option>
                     <option value="15.00" data-name="Platinum Wash">Platinum Wash</option>
-                    <option value="10.00" data-name="Custom Average">Custom Average</option>
-                </select>
+                        <option value="10.00" data-name="Custom Average">Custom Average</option>
+                    </select>
+                </div>
+            <div class="col-span-2 flex flex-col gap-1" id="customPriceGroup" style="display:none;">
+                <label for="customAvgWashPrice" class="font-medium text-gray-700">Custom Avg Price</label>
+                <input type="number" id="customAvgWashPrice" value="10.00" step="0.50" min="1" class="rounded border px-2 py-1">
             </div>
-            <div class="input-group" id="customPriceGroup" style="display:none;">
-                <label for="customAvgWashPrice">Enter Custom Average Price:</label>
-                <input type="number" id="customAvgWashPrice" value="10.00" step="0.50" min="1">
-            </div>
-            <h3 class="section-title mb-2 mt-4">Monthly Fixed Costs</h3>
-            <div class="grid grid-cols-2 gap-4">
-                <div class="input-group col-span-2">
-                    <label for="numEmployees">Number of Fixed Employees:</label>
-                    <input type="number" id="numEmployees" value="4" min="0" step="1">
+            <div class="col-span-2 text-xs text-gray-400 mt-1 mb-2">Monthly Fixed Costs</div>
+            <div class="flex flex-col gap-1">
+                <label for="numEmployees" class="font-medium text-gray-700"># Employees</label>
+                <input type="number" id="numEmployees" value="4" min="0" step="1" class="rounded border px-2 py-1">
                 </div>
-                <div class="input-group col-span-2">
-                    <label for="avgGrossSalary">Avg Gross Monthly Salary per Employee:</label>
-                    <input type="number" id="avgGrossSalary" value="900.00" min="820.00" step="10.00">
+            <div class="flex flex-col gap-1">
+                <label for="avgGrossSalary" class="font-medium text-gray-700">Avg Salary</label>
+                <input type="number" id="avgGrossSalary" value="900.00" min="820.00" step="10.00" class="rounded border px-2 py-1">
+                    </div>
+            <div class="flex flex-col gap-1">
+                <label for="monthlyRent" class="font-medium text-gray-700">Rent</label>
+                <input type="number" id="monthlyRent" value="2000" min="0" step="100" class="rounded border px-2 py-1">
+                    </div>
+            <div class="flex flex-col gap-1">
+                <label for="monthlyUtilitiesBase" class="font-medium text-gray-700">Utilities</label>
+                <input type="number" id="monthlyUtilitiesBase" value="300" min="0" step="50" class="rounded border px-2 py-1">
+                    </div>
+            <div class="col-span-2 flex flex-col gap-1">
+                <label for="monthlyInsuranceOther" class="font-medium text-gray-700">Insurance/Other</label>
+                <input type="number" id="monthlyInsuranceOther" value="200" min="0" step="50" class="rounded border px-2 py-1">
+                    </div>
+            <div class="col-span-2 text-xs text-gray-400 mt-1 mb-2">Variable Costs Per Car</div>
+            <div class="flex flex-col gap-1">
+                <label for="waterCostPerCar" class="font-medium text-gray-700">Water</label>
+                <input type="number" id="waterCostPerCar" value="0.30" min="0" step="0.05" class="rounded border px-2 py-1">
+                    </div>
+            <div class="flex flex-col gap-1">
+                <label for="soapCostPerCar" class="font-medium text-gray-700">Soap/Chemicals</label>
+                <input type="number" id="soapCostPerCar" value="0.50" min="0" step="0.05" class="rounded border px-2 py-1">
                 </div>
-                <div class="input-group">
-                    <label for="monthlyRent">Rent:</label>
-                    <input type="number" id="monthlyRent" value="2000" min="0" step="100">
-                </div>
-                <div class="input-group">
-                    <label for="monthlyUtilitiesBase">Utilities (Base):</label>
-                    <input type="number" id="monthlyUtilitiesBase" value="300" min="0" step="50">
-                </div>
-                <div class="input-group col-span-2">
-                    <label for="monthlyInsuranceOther">Insurance/Other Fixed Costs:</label>
-                    <input type="number" id="monthlyInsuranceOther" value="200" min="0" step="50">
-                </div>
-            </div>
-            <h3 class="section-title mb-2 mt-4">Variable Costs Per Car</h3>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 items-stretch">
-                <div class="input-group flex flex-col justify-end h-full">
-                    <label for="waterCostPerCar">Water:</label>
-                    <input type="number" id="waterCostPerCar" value="0.30" min="0" step="0.05">
-                </div>
-                <div class="input-group flex flex-col justify-end h-full">
-                    <label for="soapCostPerCar">Soap/Chemicals:</label>
-                    <input type="number" id="soapCostPerCar" value="0.50" min="0" step="0.05">
-                </div>
-                <div class="input-group flex flex-col justify-end h-full">
-                    <label for="electricityCostPerCar">Electricity (Direct):</label>
-                    <input type="number" id="electricityCostPerCar" value="0.40" min="0" step="0.05">
-                </div>
-                <div class="input-group flex flex-col justify-end h-full">
-                    <label for="directLaborPerCar">Direct Labor (Optional, Per Car):</label>
-                    <input type="number" id="directLaborPerCar" value="0.00" min="0" step="0.05">
-                </div>
-            </div>
-            <button type="submit" id="calculateButton" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-lg mt-4">Calculate</button>
+            <div class="flex flex-col gap-1">
+                <label for="electricityCostPerCar" class="font-medium text-gray-700">Electricity</label>
+                <input type="number" id="electricityCostPerCar" value="0.40" min="0" step="0.05" class="rounded border px-2 py-1">
+                    </div>
+            <div class="flex flex-col gap-1">
+                <label for="directLaborPerCar" class="font-medium text-gray-700">Direct Labor/Car</label>
+                <input type="number" id="directLaborPerCar" value="0.00" min="0" step="0.05" class="rounded border px-2 py-1">
+                    </div>
+            <div class="col-span-2 mt-2">
+                <button type="submit" id="calculateButton" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-lg">Calculate</button>
+                    </div>
         </form>
-        <!-- Step 2: Results Modal -->
-        <div id="resultsModal" class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50" style="display:none;">
-            <div class="bg-white rounded-lg shadow-xl p-6 max-w-lg w-full relative">
-                <button id="closeResultsModal" class="absolute top-2 right-2 text-gray-400 hover:text-gray-700">✖</button>
-                <div class="flex items-center justify-between mb-2">
-                    <h2 class="text-lg font-bold">Simulation Results</h2>
-                    <span id="trialMeter" class="text-xs bg-gray-200 text-gray-700 rounded px-2 py-0.5 ml-2">2 free scenarios left</span>
+        <!-- AI Assistant placeholder will be here in next step -->
+                    </div>
+    <!-- Step 2: Results Modal -->
+    <div id="resultsModal" class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50" style="display:none;">
+        <div class="bg-white rounded-lg shadow-xl p-6 max-w-lg w-full relative">
+            <button id="closeResultsModal" class="absolute top-2 right-2 text-gray-400 hover:text-gray-700">✖</button>
+            <div class="flex items-center justify-between mb-2">
+                <h2 class="text-lg font-bold">Simulation Results</h2>
+                <span id="trialMeter" class="text-xs bg-gray-200 text-gray-700 rounded px-2 py-0.5 ml-2">2 free scenarios left</span>
                 </div>
-                <div id="resultsContent"></div>
-                <div class="flex gap-2 mt-4">
-                    <button id="saveScenarioBtn" class="flex-1 flex items-center justify-center gap-2 bg-gray-200 hover:bg-yellow-200 text-gray-700 font-semibold px-4 py-2 rounded-lg cursor-pointer relative group">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11c0-1.104.896-2 2-2s2 .896 2 2-.896 2-2 2-2-.896-2-2zm0 0V7m0 4v4m0 0h4m-4 0H8" /></svg>
-                        Save Scenario <span class="ml-1 text-xs bg-yellow-400 text-white rounded px-2 py-0.5">Premium</span>
+            <div id="resultsContent"></div>
+            <div class="flex gap-2 mt-4">
+                <button id="saveScenarioBtn" class="flex-1 flex items-center justify-center gap-2 bg-gray-100 text-gray-400 font-semibold px-4 py-2 rounded-lg cursor-not-allowed relative group">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11c0-1.104.896-2 2-2s2 .896 2 2-.896 2-2 2-2-.896-2-2zm0 0V7m0 4v4m0 0h4m-4 0H8" /></svg>
+                    Save Scenario <span class="ml-1 text-xs bg-yellow-500 text-white rounded px-2 py-0.5 flex items-center"><svg xmlns='http://www.w3.org/2000/svg' class='inline h-4 w-4 mr-1' fill='none' viewBox='0 0 24 24' stroke='currentColor'><path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M12 11c0-1.104.896-2 2-2s2 .896 2 2-.896 2-2 2-2-.896-2-2zm0 0V7m0 4v4m0 0h4m-4 0H8' /></svg>Premium</span>
+                </button>
+                <button id="downloadPdfBtn" class="flex-1 flex items-center justify-center gap-2 bg-gray-100 text-gray-400 font-semibold px-4 py-2 rounded-lg cursor-not-allowed relative group">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+                    Download PDF <span class="ml-1 text-xs bg-yellow-500 text-white rounded px-2 py-0.5 flex items-center"><svg xmlns='http://www.w3.org/2000/svg' class='inline h-4 w-4 mr-1' fill='none' viewBox='0 0 24 24' stroke='currentColor'><path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M12 11c0-1.104.896-2 2-2s2 .896 2 2-.896 2-2 2-2-.896-2-2zm0 0V7m0 4v4m0 0h4m-4 0H8' /></svg>Premium</span>
                     </button>
-                    <button id="downloadPdfBtn" class="flex-1 flex items-center justify-center gap-2 bg-gray-200 hover:bg-blue-200 text-gray-700 font-semibold px-4 py-2 rounded-lg cursor-pointer relative group">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
-                        Download PDF <span class="ml-1 text-xs bg-blue-400 text-white rounded px-2 py-0.5">Premium</span>
-                    </button>
                 </div>
-            </div>
-        </div>
-        <!-- Paywall Modal -->
-        <div id="paywallModal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50" style="display:none;">
-            <div class="bg-white rounded-lg shadow-xl p-8 max-w-sm w-full relative text-center">
-                <button id="closePaywallModal" class="absolute top-2 right-2 text-gray-400 hover:text-gray-700">✖</button>
-                <h2 class="text-xl font-bold mb-2">Upgrade to Pro</h2>
-                <p class="mb-4">Unlock unlimited scenarios, save/load, PDF export, and more. Perfect for business owners and serious planners.</p>
-                <div class="mb-4">
-                    <span class="text-2xl font-bold text-blue-600">$9/mo</span>
-                    <span class="text-xs text-gray-500 ml-2">Cancel anytime</span>
-                </div>
-                <button class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-lg mb-2">Upgrade Now</button>
-                <div class="text-xs text-gray-400">Have a coupon or need a team plan? <a href="#" class="underline">Contact us</a></div>
-            </div>
+            <div class="text-xs text-gray-500 text-center mt-2">Upgrade to Premium to unlock Save and Download.</div>
         </div>
     </div>
+    <!-- Paywall Modal -->
+    <div id="paywallModal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50" style="display:none;">
+        <div class="bg-white rounded-lg shadow-xl p-8 max-w-sm w-full relative text-center">
+            <button id="closePaywallModal" class="absolute top-2 right-2 text-gray-400 hover:text-gray-700">✖</button>
+            <h2 class="text-xl font-bold mb-2">Upgrade to Pro</h2>
+            <p class="mb-4">Unlock unlimited scenarios, save/load, PDF export, and more. Perfect for business owners and serious planners.</p>
+            <div class="mb-4">
+                <span class="text-2xl font-bold text-blue-600">$49/mo</span>
+                <span class="text-xs text-gray-500 ml-2">Cancel anytime</span>
+            </div>
+            <button id="upgradeNowBtn" type="button" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-lg mb-2">Upgrade Now</button>
+            <div class="text-xs text-gray-400">Have a coupon or need a team plan? <a href="#" class="underline">Contact us</a></div>
+                 </div>
+                 </div>
 
     <div id="aiChatWidget" class="fixed bottom-4 right-4 bg-white rounded-lg shadow-xl border border-gray-200 z-50 overflow-hidden w-80 h-96 flex flex-col">
         <div class="bg-blue-600 text-white p-3 font-semibold flex justify-between items-center">
             AI Assistant
             <span class="ml-2 text-xs bg-yellow-400 text-white rounded px-2 py-0.5 cursor-pointer" id="aiPremiumTeaser">More AI Chats <svg xmlns='http://www.w3.org/2000/svg' class='inline h-4 w-4 text-white' fill='none' viewBox='0 0 24 24' stroke='currentColor'><path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M12 11c0-1.104.896-2 2-2s2 .896 2 2-.896 2-2 2-2-.896-2-2zm0 0V7m0 4v4m0 0h4m-4 0H8' /></svg></span>
             <button id="closeChat" class="text-white hover:text-gray-200 focus:outline-none">✖</button>
-        </div>
+                </div>
         <div id="chatMessages" class="flex-1 p-3 overflow-y-auto text-sm bg-gray-50">
             <!-- Chat messages will be appended here -->
             <div class="text-center text-gray-500 py-2">Ask me anything about your car wash simulation!</div>
-        </div>
+            </div>
         <div class="border-t border-gray-200 p-3 flex items-center">
             <input type="text" id="chatInput" class="flex-1 border border-gray-300 rounded-lg px-3 py-2 mr-2 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Type your message...">
             <button id="sendMessage" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold">Send</button>
@@ -332,7 +330,12 @@
     </button>
 
     <script>
-        // Constants for Portuguese employer costs (Approximate)
+        // Supabase initialization - MOVED TO TOP AND FIXED
+        const supabaseUrl = 'https://iaiicqnzpupfqdqycgfr.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlhaWljcW56cHVwZnFkcXljZ2ZyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg4NjY2MjksImV4cCI6MjA2NDQ0MjYyOX0.-v1ERxSAysLozyylipnqjp6C14k5zg2BMqgOUISQjd4';
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey); // FIX: Use window.supabase
+
+        // Constants
         const EMPLOYER_SS_RATE = 0.2375; // ~23.75% for general regime
         const DAYS_IN_MONTH = 30;
 
@@ -357,92 +360,68 @@
         const electricityCostPerCarEl = document.getElementById('electricityCostPerCar');
         const directLaborPerCarEl = document.getElementById('directLaborPerCar');
 
-        const calculateButton = document.getElementById('calculateButton'); // Button element
+        // Result Displays (These are now handled by generateResultsHtml, but keeping references for consistency if needed elsewhere)
+        // const selectedProgramNameEl = document.getElementById('selectedProgramName');
+        // const totalCarsDayEl = document.getElementById('totalCarsDay');
+        // const dailyRevenueEl = document.getElementById('dailyRevenue');
+        // const totalVariableCostPerCarDisplayEl = document.getElementById('totalVariableCostPerCarDisplay');
+        // const dailyVariableCostsEl = document.getElementById('dailyVariableCosts');
+        // const totalMonthlySalaryCostsDisplayEl = document.getElementById('totalMonthlySalaryCostsDisplay');
+        // const grossMonthlySalariesDisplayEl = document.getElementById('grossMonthlySalariesDisplay');
+        // const employerSSDisplayEl = document.getElementById('employerSSDisplay');
+        // const totalDailyFixedCostsDisplayEl = document.getElementById('totalDailyFixedCostsDisplay');
+        // const dailyProfitTextEl = document.getElementById('dailyProfitText');
+        // const dailyProfitEl = document.getElementById('dailyProfit');
+        // const monthlyProfitTextEl = document.getElementById('monthlyProfitText');
+        // const monthlyRevenueEl = document.getElementById('monthlyRevenue');
+        // const monthlyProfitEl = document.getElementById('monthlyProfit');
 
-        // Result Displays
-        const selectedProgramNameEl = document.getElementById('selectedProgramName');
-        const totalCarsDayEl = document.getElementById('totalCarsDay');
-        const dailyRevenueEl = document.getElementById('dailyRevenue');
-
-        const totalVariableCostPerCarDisplayEl = document.getElementById('totalVariableCostPerCarDisplay');
-        const dailyVariableCostsEl = document.getElementById('dailyVariableCosts');
-
-        const totalMonthlySalaryCostsDisplayEl = document.getElementById('totalMonthlySalaryCostsDisplay');
-        const grossMonthlySalariesDisplayEl = document.getElementById('grossMonthlySalariesDisplay');
-        const employerSSDisplayEl = document.getElementById('employerSSDisplay');
-
-        const totalDailyFixedCostsDisplayEl = document.getElementById('totalDailyFixedCostsDisplay');
-
-        const dailyProfitTextEl = document.getElementById('dailyProfitText'); // Target the <p> element for profit/loss class
-        const dailyProfitEl = document.getElementById('dailyProfit'); // Target the <span> for the value
-
-        const monthlyProfitTextEl = document.getElementById('monthlyProfitText'); // Target the <p> element for profit/loss class
-        const monthlyProfitEl = document.getElementById('monthlyProfit'); // Target the <span> for the value
-        const monthlyRevenueEl = document.getElementById('monthlyRevenue');
-
-        const busynessIndicatorEl = document.getElementById('busynessIndicator');
-        const busynessTextEl = document.getElementById('busynessText');
+        const busynessIndicatorEl = document.getElementById('busynessIndicator'); // This is still in the main HTML, so keep it
+        const busynessTextEl = document.getElementById('busynessText'); // This is still in the main HTML, so keep it
 
         // New global variable for dynamic employer SS rate
         let currentEmployerSSRate = 0; // Initialize with 0, will be set by applyCountryConfig
 
         // Consolidate all input elements that should trigger recalculation on 'input'
-        // (except select which uses 'change')
         const allRecalculatingInputEls = [
             operatingHoursEl, carsPerHourEl, customAvgWashPriceEl,
             numEmployeesEl, avgGrossSalaryEl, monthlyRentEl, monthlyUtilitiesBaseEl, monthlyInsuranceOtherEl,
             waterCostPerCarEl, soapCostPerCarEl, electricityCostPerCarEl, directLaborPerCarEl
         ];
 
-        // Event Listeners
-
-        // Slider uses 'input' for immediate feedback
+        // Event Listeners for input changes (these will trigger calculateSimulation indirectly via generateResultsHtml)
         carsPerHourEl.addEventListener('input', () => {
             carsPerHourValueEl.textContent = carsPerHourEl.value;
-            calculateSimulation();
+            // No direct calculateSimulation call here, it's triggered by form submit
         });
 
-        // Select dropdown uses 'change'
         avgWashPriceEl.addEventListener('change', () => {
             const selectedOption = avgWashPriceEl.selectedOptions[0];
             const selectedName = selectedOption.dataset.name;
 
             if (selectedName === "Custom Average") {
                 customPriceGroupEl.style.display = 'block';
-                 // Update selectedProgramName display immediately
-                selectedProgramNameEl.textContent = `Custom (${currentCurrency}${ (parseFloat(customAvgWashPriceEl.value) || 0).toFixed(2)})`;
             } else {
                 customPriceGroupEl.style.display = 'none';
-                selectedProgramNameEl.textContent = selectedName; // Update selectedProgramName display
             }
-            calculateSimulation();
+            // No direct calculateSimulation call here, it's triggered by form submit
         });
 
-        // Update custom price display as user types in custom price field
          customAvgWashPriceEl.addEventListener('input', () => {
-             const price = parseFloat(customAvgWashPriceEl.value) || 0;
-             selectedProgramNameEl.textContent = `Custom (${currentCurrency}${price.toFixed(2)})`;
-             calculateSimulation(); // Also trigger full calculation
+            // No direct calculateSimulation call here, it's triggered by form submit
          });
 
-
-        // All other number inputs use 'input' for immediate feedback
         allRecalculatingInputEls.forEach(el => {
-             // Avoid adding duplicate listeners or adding to elements already handled
              if (el !== carsPerHourEl && el !== customAvgWashPriceEl && el !== avgWashPriceEl) {
-                el.addEventListener('input', calculateSimulation);
+                // No direct calculateSimulation call here, it's triggered by form submit
              }
         });
-
-        // The button click listener exists but is less critical as inputs auto-update
-        // calculateButton.addEventListener('click', calculateSimulation); // Commented out or removed
 
         const countrySelectorEl = document.getElementById('countrySelector');
         let countryConfigs = {};
         let currentCountry = 'PT';
         let currentCurrency = '€';
 
-        // Placeholder: Load country configs (simulate fetch)
         async function loadCountryConfigs() {
             try {
                 const response = await fetch('config/countries.json');
@@ -452,7 +431,6 @@
                     countryConfigs[cfg.code] = cfg;
                 });
             } catch (e) {
-                // Fallback to Portugal config if fetch fails
                 countryConfigs = {
                     'PT': {
                         country: 'Portugal', currency: '€', minWage: 820, employerTaxRate: 0.2375, defaultRent: 2000, defaultUtilities: 300, defaultInsurance: 200,
@@ -463,22 +441,17 @@
         }
 
         function updateCurrencySymbols(symbol) {
-            // Update all labels and placeholders with the correct currency symbol
-            // Fixed Costs
             document.querySelector('label[for="avgGrossSalary"]').innerHTML = `Avg Gross Monthly Salary per Employee (${symbol}): (Min Wage: ${symbol}${countryConfigs[currentCountry].minWage})`;
             document.querySelector('label[for="monthlyRent"]').innerHTML = `Rent (${symbol}):`;
             document.querySelector('label[for="monthlyUtilitiesBase"]').innerHTML = `Utilities (Base) (${symbol}):`;
             document.querySelector('label[for="monthlyInsuranceOther"]').innerHTML = `Insurance/Other Fixed Costs (${symbol}):`;
-            // Variable Costs
             document.querySelector('label[for="waterCostPerCar"]').innerHTML = `Water (${symbol}):`;
             document.querySelector('label[for="soapCostPerCar"]').innerHTML = `Soap/Chemicals (${symbol}):`;
             document.querySelector('label[for="electricityCostPerCar"]').innerHTML = `Electricity (Direct) (${symbol}):`;
             document.querySelector('label[for="directLaborPerCar"]').innerHTML = `Direct Labor (Optional, Per Car) (${symbol}):`;
-            // Custom price input
             document.querySelector('label[for="customAvgWashPrice"]').innerHTML = `Enter Custom Average Price (${symbol}):`;
-            // Section titles
-            document.querySelector('h3.section-title.mb-4.mt-8').innerHTML = `Monthly Fixed Costs (${symbol})`;
-            document.querySelectorAll('h3.section-title.mb-4.mt-8')[1].innerHTML = `Variable Costs Per Car (${symbol})`;
+            document.querySelector('h3.section-title.mb-2.mt-4').innerHTML = `Monthly Fixed Costs (${symbol})`;
+            document.querySelectorAll('h3.section-title.mb-2.mt-4')[1].innerHTML = `Variable Costs Per Car (${symbol})`;
         }
 
         function applyCountryConfig(countryCode) {
@@ -486,7 +459,7 @@
             if (!config) return;
             currentCountry = countryCode;
             currentCurrency = config.currency;
-            // Update all input fields and labels with config defaults
+            
             document.getElementById('avgGrossSalary').value = config.minWage;
             document.getElementById('monthlyRent').value = config.defaultRent;
             document.getElementById('monthlyUtilitiesBase').value = config.defaultUtilities;
@@ -495,22 +468,17 @@
             document.getElementById('soapCostPerCar').value = config.defaultPerCar.soap;
             document.getElementById('electricityCostPerCar').value = config.defaultPerCar.electricity;
             document.getElementById('directLaborPerCar').value = config.defaultPerCar.labor;
-            // Update wash price options
+            
             const avgWashPriceEl = document.getElementById('avgWashPrice');
             avgWashPriceEl.innerHTML = '';
             config.defaultWashPrices.forEach((price, idx) => {
                 const name = ['Bronze', 'Silver', 'Gold', 'Platinum'][idx] || `Option ${idx+1}`;
                 avgWashPriceEl.innerHTML += `<option value="${price.toFixed(2)}" data-name="${name} Wash">${name} Wash (${config.currency}${price.toFixed(2)})</option>`;
             });
-            avgWashPriceEl.innerHTML += `<option value="10.00" data-name="Custom Average">Custom Average</option>`;
-            // Update all currency symbols in the UI (labels, results, etc.)
-            updateCurrencySymbols(config.currency);
+            
+            currentEmployerSSRate = config.employerTaxRate;
 
-            // Set dynamic employer SS rate
-            currentEmployerSSRate = config.employerTaxRate; // Update this based on country config
-
-            // Sort and populate country selector (moved here for dynamic updates)
-            countrySelectorEl.innerHTML = ''; // Clear existing options
+            countrySelectorEl.innerHTML = '';
             const sortedCountries = Object.values(countryConfigs).sort((a, b) => a.country.localeCompare(b.country));
             sortedCountries.forEach(country => {
                 const option = document.createElement('option');
@@ -518,160 +486,86 @@
                 option.textContent = country.country;
                 countrySelectorEl.appendChild(option);
             });
-            // Set the selected country after populating
             countrySelectorEl.value = currentCountry;
 
-            calculateSimulation();
+            updateCurrencySymbols(currentCurrency); // Update symbols after setting new currency
         }
 
-        countrySelectorEl.addEventListener('change', (e) => {
-            applyCountryConfig(e.target.value);
-        });
-
-        function calculateSimulation() {
-            // Get operational input values
-            const operatingHours = parseFloat(operatingHoursEl.value) || 0;
-            const carsPerHour = parseFloat(carsPerHourEl.value) || 0;
-
-            let avgWashPrice;
-            let selectedProgramNameDisplay;
-
-            const selectedOption = avgWashPriceEl.selectedOptions[0];
-            const selectedName = selectedOption.dataset.name;
-
-            if (selectedName === "Custom Average") {
-                avgWashPrice = parseFloat(customAvgWashPriceEl.value) || 0;
-                selectedProgramNameDisplay = `Custom (${currentCurrency}${avgWashPrice.toFixed(2)})`;
-            } else {
-                avgWashPrice = parseFloat(avgWashPriceEl.value) || 0;
-                selectedProgramNameDisplay = selectedName;
-            }
-
-            // Calculate Salary Costs (Monthly)
-            const numEmployees = parseFloat(numEmployeesEl.value) || 0;
-            const avgGrossSalary = parseFloat(avgGrossSalaryEl.value) || 0;
+        // Refactored calculateSimulation to return values
+        function calculateSimulation(inputs) {
+            const {
+                operatingHours, carsPerHour, avgWashPrice, numEmployees, avgGrossSalary,
+                monthlyRent, monthlyUtilitiesBase, monthlyInsuranceOther,
+                waterCostPerCar, soapCostPerCar, electricityCostPerCar, directLaborPerCar
+            } = inputs;
 
             const totalGrossMonthlySalaries = numEmployees * avgGrossSalary;
-            const employerSSContribution = totalGrossMonthlySalaries * currentEmployerSSRate; // Use dynamic rate
+            const employerSSContribution = totalGrossMonthlySalaries * currentEmployerSSRate;
             const totalMonthlySalaryCosts = totalGrossMonthlySalaries + employerSSContribution;
 
-            // Get other Fixed Costs (Monthly)
-            const monthlyRent = parseFloat(monthlyRentEl.value) || 0;
-            const monthlyUtilitiesBase = parseFloat(monthlyUtilitiesBaseEl.value) || 0;
-            const monthlyInsuranceOther = parseFloat(monthlyInsuranceOtherEl.value) || 0;
-
-            // Calculate Total Fixed Costs (Monthly and Daily)
             const totalMonthlyFixedCosts = totalMonthlySalaryCosts + monthlyRent + monthlyUtilitiesBase + monthlyInsuranceOther;
-            const dailyFixedCosts = totalMonthlyFixedCosts / DAYS_IN_MONTH; // Assuming 30 days per month
+            const dailyFixedCosts = totalMonthlyFixedCosts / DAYS_IN_MONTH;
 
-            // Get and calculate Variable Costs per Car
-            const waterCostPerCar = parseFloat(waterCostPerCarEl.value) || 0;
-            const soapCostPerCar = parseFloat(soapCostPerCarEl.value) || 0;
-            const electricityCostPerCar = parseFloat(electricityCostPerCarEl.value) || 0;
-            const directLaborPerCar = parseFloat(directLaborPerCarEl.value) || 0;
             const totalVariableCostPerCar = waterCostPerCar + soapCostPerCar + electricityCostPerCar + directLaborPerCar;
 
-            // Core Calculations
             const totalCarsDay = operatingHours * carsPerHour;
             const dailyRevenue = totalCarsDay * avgWashPrice;
             const dailyTotalVariableCosts = totalCarsDay * totalVariableCostPerCar;
             const dailyTotalCosts = dailyTotalVariableCosts + dailyFixedCosts;
             const dailyProfit = dailyRevenue - dailyTotalCosts;
 
-            const monthlyRevenue = dailyRevenue * DAYS_IN_MONTH; // Simple multiplication for estimate
-            const monthlyProfit = dailyProfit * DAYS_IN_MONTH; // Simple multiplication for estimate
-
-            // Display Results
-            selectedProgramNameEl.textContent = selectedProgramNameDisplay;
-            totalCarsDayEl.textContent = totalCarsDay.toFixed(0);
-            dailyRevenueEl.textContent = `${currentCurrency}${dailyRevenue.toFixed(2)}`;
-
-            totalVariableCostPerCarDisplayEl.textContent = `${currentCurrency}${totalVariableCostPerCar.toFixed(2)}`;
-            dailyVariableCostsEl.textContent = `${currentCurrency}${dailyTotalVariableCosts.toFixed(2)}`;
-
-            // Update Salary Cost Display
-            totalMonthlySalaryCostsDisplayEl.textContent = `${currentCurrency}${totalMonthlySalaryCosts.toFixed(2)}`;
-            grossMonthlySalariesDisplayEl.textContent = `${currentCurrency}${totalGrossMonthlySalaries.toFixed(2)}`;
-            // Update Employer SS display with dynamic rate
-            employerSSDisplayEl.textContent = `${currentCurrency}${employerSSContribution.toFixed(2)} (Employer SS, ~${(currentEmployerSSRate * 100).toFixed(2)}%):`;
-
-            totalDailyFixedCostsDisplayEl.textContent = `${currentCurrency}${dailyFixedCosts.toFixed(2)}`;
-
-            dailyProfitEl.textContent = `${currentCurrency}${dailyProfit.toFixed(2)}`;
-            monthlyRevenueEl.textContent = `${currentCurrency}${monthlyRevenue.toFixed(2)}`;
-            monthlyProfitEl.textContent = `${currentCurrency}${monthlyProfit.toFixed(2)}`;
-
-            // Update profit/loss colors by changing class on the parent <p> of the span
-            dailyProfitTextEl.classList.remove('profit', 'loss'); // Remove previous state classes
-             if (dailyProfit < 0) {
-                dailyProfitTextEl.classList.add('loss'); // Add 'loss' class if negative
-            } else {
-                dailyProfitTextEl.classList.add('profit'); // Add 'profit' class if positive or zero
-            }
-
-            monthlyProfitTextEl.classList.remove('profit', 'loss'); // Remove previous state classes
-            if (monthlyProfit < 0) {
-                monthlyProfitTextEl.classList.add('loss'); // Add 'loss' class if negative
-            } else {
-                monthlyProfitTextEl.classList.add('profit'); // Add 'profit' class if positive or zero
-            }
-
+            const monthlyRevenue = dailyRevenue * DAYS_IN_MONTH;
+            const monthlyProfit = dailyProfit * DAYS_IN_MONTH;
 
             // Busyness Indicator - Simplified estimation
-            // Assumption: IMO Lisbon has multiple bays (e.g., 3 or 4).
-            // Let's assume 3 bays, average cycle time ~10 minutes per car per bay.
             const theoreticalCycleTimePerBayMinutes = 10;
-            const theoreticalMaxCarsPerBayPerHour = 60 / theoreticalCycleTimePerBayMinutes; // 6 cars/hour per bay
-            const assumedNumberOfBays = 3; // Estimate based on typical IMO setup / photos
+            const theoreticalMaxCarsPerBayPerHour = 60 / theoreticalCycleTimePerBayMinutes;
+            const assumedNumberOfBays = 3;
             const totalTheoreticalMaxCarsPerHour = theoreticalMaxCarsPerBayPerHour * assumedNumberOfBays;
 
-            // Adjust the busyness thresholds based on this total capacity
+            let busynessText = "Calculating...";
+            let busynessClass = "mt-4 p-3 rounded-md text-center bg-gray-200 text-gray-600";
+
             if (totalCarsDay === 0 || carsPerHour === 0) {
-                busynessTextEl.textContent = "Idle";
-                busynessIndicatorEl.className = "mt-4 p-3 rounded-md text-center bg-gray-200 text-gray-600";
-            } else if (carsPerHour <= totalTheoreticalMaxCarsPerHour * 0.2) { // Light load
-                busynessTextEl.textContent = "Light";
-                busynessIndicatorEl.className = "mt-4 p-3 rounded-md text-center bg-green-100 text-green-700";
-            } else if (carsPerHour <= totalTheoreticalMaxCarsPerHour * 0.5) { // Moderate load
-                 busynessTextEl.textContent = "Moderate";
-                busynessIndicatorEl.className = "mt-4 p-3 rounded-md text-center bg-yellow-100 text-yellow-700";
-            } else if (carsPerHour <= totalTheoreticalMaxCarsPerHour * 0.9) { // High load, near capacity
-                 busynessTextEl.textContent = "Busy";
-                busynessIndicatorEl.className = "mt-4 p-3 rounded-md text-center bg-orange-100 text-orange-700";
-            } else { // Exceeding nominal capacity
-                busynessTextEl.textContent = `Very Busy (Potential Queues) - Est. Capacity: ${totalTheoreticalMaxCarsPerHour.toFixed(1)} cars/hr`;
-                busynessIndicatorEl.className = "mt-4 p-3 rounded-md text-center bg-red-100 text-red-700";
+                busynessText = "Idle";
+                busynessClass = "mt-4 p-3 rounded-md text-center bg-gray-200 text-gray-600";
+            } else if (carsPerHour <= totalTheoreticalMaxCarsPerHour * 0.2) {
+                busynessText = "Light";
+                busynessClass = "mt-4 p-3 rounded-md text-center bg-green-100 text-green-700";
+            } else if (carsPerHour <= totalTheoreticalMaxCarsPerHour * 0.5) {
+                 busynessText = "Moderate";
+                busynessClass = "mt-4 p-3 rounded-md text-center bg-yellow-100 text-yellow-700";
+            } else if (carsPerHour <= totalTheoreticalMaxCarsPerHour * 0.9) {
+                 busynessText = "Busy";
+                busynessClass = "mt-4 p-3 rounded-md text-center bg-orange-100 text-orange-700";
+            } else {
+                busynessText = `Very Busy (Potential Queues) - Est. Capacity: ${totalTheoreticalMaxCarsPerHour.toFixed(1)} cars/hr`;
+                busynessClass = "mt-4 p-3 rounded-md text-center bg-red-100 text-red-700";
             }
+
+            return {
+                selectedProgramNameDisplay: inputs.selectedProgramNameDisplay, // Pass this from input gathering
+                totalCarsDay, dailyRevenue, totalVariableCostPerCar, dailyTotalVariableCosts,
+                totalMonthlySalaryCosts, totalGrossMonthlySalaries, employerSSContribution,
+                totalDailyFixedCosts: dailyFixedCosts, dailyProfit, monthlyRevenue, monthlyProfit,
+                busynessText, busynessClass
+            };
         }
 
-        // Initial calculation on page load
+        // Initial setup on page load
         document.addEventListener('DOMContentLoaded', async () => {
-            // Load configs and apply default
-            await loadCountryConfigs(); // Ensure configs are loaded before applying
-            
-            // Set initial country to US
-            const countrySelectorEl = document.getElementById('countrySelector');
+            await loadCountryConfigs();
             countrySelectorEl.value = 'US'; 
+            applyCountryConfig(countrySelectorEl.value);
 
-            applyCountryConfig(countrySelectorEl.value); // Apply initial config
-
-            // Initialize slider display
             carsPerHourValueEl.textContent = carsPerHourEl.value;
-            // Ensure custom price group display is correct based on initial selection
+
             const selectedOption = avgWashPriceEl.selectedOptions[0];
-            const selectedName = selectedOption.dataset.name;
-             if (selectedName === "Custom Average") {
+            if (selectedOption && selectedOption.dataset.name === "Custom Average") {
                 customPriceGroupEl.style.display = 'block';
-                 // Set initial display for custom price if it's selected
-                 selectedProgramNameEl.textContent = `Custom (${currentCurrency}${ (parseFloat(customAvgWashPriceEl.value) || 0).toFixed(2)})`;
             } else {
                 customPriceGroupEl.style.display = 'none';
-                // Set initial display for pre-set price
-                 selectedProgramNameEl.textContent = selectedName;
             }
-
-            // Run the initial calculation
-            calculateSimulation();
         });
 
         // New DOM elements for AI Chat
@@ -706,19 +600,16 @@
             if (!message) return;
 
             chatInput.value = '';
-            appendMessage(message, 'user');
+            _appendMessageCore(message, 'user');
 
-            // Disable input and button
             chatInput.disabled = true;
             sendMessageButton.disabled = true;
-            appendMessage("Thinking...", 'ai-loading');
+            _appendMessageCore("Thinking...", 'ai-loading');
 
             try {
-                // Capture current simulator state
-                const scenario = {
+                const currentInputs = {
                     operatingHours: parseFloat(operatingHoursEl.value) || 0,
                     carsPerHour: parseFloat(carsPerHourEl.value) || 0,
-                    // Dynamically get avgWashPrice based on current selection or custom input
                     avgWashPrice: (() => {
                         const selectedOption = avgWashPriceEl.selectedOptions[0];
                         const selectedName = selectedOption.dataset.name;
@@ -738,14 +629,13 @@
                     currentCountry: currentCountry,
                     currentCurrency: currentCurrency,
                     currentEmployerSSRate: currentEmployerSSRate,
-                    // Include calculated results for AI context
-                    totalCarsDay: parseFloat(totalCarsDayEl.textContent) || 0,
-                    dailyRevenue: parseFloat(dailyRevenueEl.textContent.replace(currentCurrency, '')) || 0,
-                    dailyProfit: parseFloat(dailyProfitEl.textContent.replace(currentCurrency, '')) || 0,
-                    monthlyProfit: parseFloat(monthlyProfitEl.textContent.replace(currentCurrency, '')) || 0,
-                    // Pass current HTML for more dynamic AI responses (e.g., to identify inputs)
-                    // This can be heavy, consider simplifying or adding specific element IDs
-                    // currentHtml: document.body.outerHTML // WARNING: Can be very large!
+                };
+
+                const calculatedResults = calculateSimulation(currentInputs);
+
+                const scenario = {
+                    ...currentInputs,
+                    ...calculatedResults
                 };
 
                 const response = await fetch('/.netlify/functions/ai-chat', {
@@ -760,12 +650,29 @@
 
                 if (response.ok) {
                     removeLoadingMessage();
-                    const aiReply = data.reply;
-                    appendMessage(aiReply, 'assistant');
+                    const aiRaw = data.reply;
+                    // Replace nerdy IDs with human-friendly labels for display
+                    const aiReplyDisplay = aiRaw.replace(/`Set (\w+) to ([\d\.]+)`/g, (match, id, val) => {
+                        const labels = {
+                            operatingHours: "Operating Hours per Day",
+                            carsPerHour: "Average Cars per Hour",
+                            avgWashPrice: "Average Price per Wash",
+                            numEmployees: "Number of Fixed Employees",
+                            avgGrossSalary: "Avg Gross Monthly Salary per Employee",
+                            monthlyRent: "Rent",
+                            monthlyUtilitiesBase: "Utilities (Base)",
+                            monthlyInsuranceOther: "Insurance/Other Fixed Costs",
+                            waterCostPerCar: "Water Cost per Car",
+                            soapCostPerCar: "Soap/Chemicals Cost per Car",
+                            electricityCostPerCar: "Electricity Cost per Car",
+                            directLaborPerCar: "Direct Labor Cost per Car"
+                        };
+                        const label = labels[id] || id;
+                        return `Set **${label}** to ${val}`;
+                    });
+                    await typewriterReply(aiReplyDisplay);
 
-                    // Check if AI suggests changes and apply them
-                    // This is a simple pattern match, more complex parsing might be needed
-                    const changes = parseAiSuggestions(aiReply);
+                    const changes = parseAiSuggestions(aiRaw);
                     if (Object.keys(changes).length > 0) {
                         console.log("AI suggested changes:", changes);
                         applyAiSuggestions(changes);
@@ -783,14 +690,12 @@
             } finally {
                 chatInput.disabled = false;
                 sendMessageButton.disabled = false;
-                chatMessages.scrollTop = chatMessages.scrollHeight; // Scroll to bottom
+                chatMessages.scrollTop = chatMessages.scrollHeight;
             }
         }
 
-        // Function to parse AI suggestions (simple example)
         function parseAiSuggestions(text) {
             const suggestions = {};
-            // Example: "Set carsPerHour to 15" or "Set monthlyRent to 2500"
             const regex = /Set (\w+) to (\d+\.?\d*)/g;
             let match;
             while ((match = regex.exec(text)) !== null) {
@@ -799,7 +704,6 @@
             return suggestions;
         }
 
-        // Function to apply AI suggestions to simulator inputs
         function applyAiSuggestions(changes) {
             let applied = false;
             for (const key in changes) {
@@ -809,9 +713,7 @@
                     inputElement.value = changes[key];
                     console.log(`Updated ${key} from ${oldValue} to ${changes[key]}`);
                     applied = true;
-                    // Manually trigger input event for consistency
                     inputElement.dispatchEvent(new Event('input'));
-                     // If the change is to avgWashPrice, ensure custom price group is handled
                     if (key === 'avgWashPrice') {
                         const customOption = Array.from(avgWashPriceEl.options).find(opt => opt.dataset.name === "Custom Average");
                         if (customOption) {
@@ -824,28 +726,39 @@
                 }
             }
             if (applied) {
-                calculateSimulation();
+                // After applying suggestions, re-calculate and update results modal if open
+                if (resultsModal.style.display === 'flex') {
+                    showResultsModal(); // Re-render results with new values
+                }
                 appendMessage("Simulator inputs updated based on AI suggestions!", 'assistant');
             }
         }
 
-        // Basic Markdown to HTML conversion for AI responses
         function convertMarkdownToHtml(text) {
-            // Convert bold (**text** or __text__)
             text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
             text = text.replace(/__(.*?)__/g, '<strong>$1</strong>');
-            // Convert italics (*text* or _text_)
             text = text.replace(/\*(.*?)\*/g, '<em>$1</em>');
             text = text.replace(/_(.*?)_/g, '<em>$1</em>');
-            // Convert newlines to <br> for basic paragraphs
             text = text.replace(/\n/g, '<br>');
-            // Convert list items (simple - item or * item) to basic <p> for now
-            text = text.replace(/^- (.*)/gm, '&bull; $1<br>'); // Bullet points
+            text = text.replace(/^- (.*)/gm, '&bull; $1<br>');
             text = text.replace(/^\* (.*)/gm, '&bull; $1<br>');
             return text;
         }
 
-        // Original appendMessage logic before the override
+        // Typewriter effect for AI assistant replies
+        async function typewriterReply(text) {
+            const msgDiv = document.createElement('div');
+            msgDiv.classList.add('message', 'p-2', 'my-1', 'rounded-lg', 'assistant-message');
+            chatMessages.appendChild(msgDiv);
+            let currentText = '';
+            for (const char of text) {
+                currentText += char;
+                msgDiv.innerHTML = convertMarkdownToHtml(currentText);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+                await new Promise(r => setTimeout(r, 15));
+            }
+        }
+
         function _appendMessageCore(text, sender) {
             const msgDiv = document.createElement('div');
             msgDiv.classList.add('message', 'p-2', 'my-1', 'rounded-lg');
@@ -857,22 +770,20 @@
             } else if (sender === 'ai-loading') {
                  msgDiv.classList.add('bg-gray-100', 'text-gray-500', 'italic', 'self-start', 'loading-message');
             } else if (sender === 'error') {
-                msgDiv.classList.add('bg-red-100', 'text-red-700', 'self-start', 'error-message'); // Added error-message class
+                msgDiv.classList.add('bg-red-100', 'text-red-700', 'self-start', 'error-message');
             }
             msgDiv.textContent = text;
             chatMessages.appendChild(msgDiv);
         }
 
-        // Override appendMessage to use markdown conversion for assistant messages
         const appendMessage = function(text, sender) {
             if (sender === 'assistant') {
-                // Create a div for the message and set its innerHTML
                 const msgDiv = document.createElement('div');
                 msgDiv.classList.add('message', 'p-2', 'my-1', 'rounded-lg', 'assistant-message');
                 msgDiv.innerHTML = convertMarkdownToHtml(text);
                 chatMessages.appendChild(msgDiv);
             } else {
-                _appendMessageCore(text, sender); // Use the core function for other types
+                _appendMessageCore(text, sender);
             }
             chatMessages.scrollTop = chatMessages.scrollHeight;
         };
@@ -884,58 +795,16 @@
             }
         }
 
-        // Supabase initialization
-        const supabaseUrl = 'https://iaiicqnzpupfqdqycgfr.supabase.co';
-        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlhaWljcW56cHVwZnFkcXljZ2ZyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg4NjY2MjksImV4cCI6MjA2NDQ0MjYyOX0.-v1ERxSAysLozyylipnqjp6C14k5zg2BMqgOUISQjd4';
-        const supabase = supabase.createClient(supabaseUrl, supabaseKey);
-
-        // Add event listeners for premium teasers
-        const saveScenarioBtn = document.getElementById('saveScenarioBtn');
-        const aiPremiumTeaser = document.getElementById('aiPremiumTeaser');
-        function showAuthModalWithBenefits() {
-          authModal.style.display = 'flex';
-          document.getElementById('auth-status').textContent = 'Create a free account to unlock premium features: save scenarios, unlimited AI chats, and more!';
-        }
-        saveScenarioBtn.addEventListener('click', showAuthModalWithBenefits);
-        aiPremiumTeaser.addEventListener('click', showAuthModalWithBenefits);
-        // Hide modal after successful login/signup
-        async function signUp() {
-          const email = document.getElementById('email').value;
-          const password = document.getElementById('password').value;
-          const { error } = await supabase.auth.signUp({ email, password });
-          document.getElementById('auth-status').textContent = error ? error.message : 'Check your email for confirmation!';
-          if (!error) setTimeout(() => { authModal.style.display = 'none'; }, 1200);
-        }
-        async function signIn() {
-          const email = document.getElementById('email').value;
-          const password = document.getElementById('password').value;
-          const { error } = await supabase.auth.signInWithPassword({ email, password });
-          document.getElementById('auth-status').textContent = error ? error.message : 'Signed in!';
-          if (!error) setTimeout(() => { authModal.style.display = 'none'; }, 800);
-        }
-        async function signOut() {
-          await supabase.auth.signOut();
-          document.getElementById('auth-status').textContent = 'Signed out!';
-        }
-
-        supabase.auth.onAuthStateChange((event, session) => {
-            if (session && session.user) {
-                document.getElementById('auth-status').textContent = `Logged in as ${session.user.email}`;
-            } else {
-                document.getElementById('auth-status').textContent = 'Not logged in';
-            }
-        });
-
         // Add modal open/close logic
         const authModal = document.getElementById('authModal');
         const openAuthModalBtn = document.getElementById('openAuthModal');
         const closeAuthModalBtn = document.getElementById('closeAuthModal');
-        openAuthModalBtn.addEventListener('click', () => { authModal.style.display = 'flex'; });
-        closeAuthModalBtn.addEventListener('click', () => { authModal.style.display = 'none'; });
+        if (openAuthModalBtn) openAuthModalBtn.addEventListener('click', () => { authModal.style.display = 'flex'; });
+        if (closeAuthModalBtn) closeAuthModalBtn.addEventListener('click', () => { authModal.style.display = 'none'; });
         window.addEventListener('click', (e) => { if (e.target === authModal) authModal.style.display = 'none'; });
 
         // Two-step flow logic
-        let trialCount = 2;
+        let trialCount = parseInt(localStorage.getItem('trialCount') || '2', 10);
         const simSetupForm = document.getElementById('simSetupForm');
         const resultsModal = document.getElementById('resultsModal');
         const resultsContent = document.getElementById('resultsContent');
@@ -943,23 +812,82 @@
         const paywallModal = document.getElementById('paywallModal');
         const closeResultsModal = document.getElementById('closeResultsModal');
         const closePaywallModal = document.getElementById('closePaywallModal');
-        const downloadPdfBtn = document.getElementById('downloadPdfBtn');
 
+        // Prevent default form submission
         simSetupForm.addEventListener('submit', function(e) {
           e.preventDefault();
-          if (trialCount > 0) {
+
+          // Allow if user has premium or free trials left
+          const isPremium = localStorage.getItem('isPremium') === 'true';
+          if (trialCount > 0 || isPremium) {
             showResultsModal();
-            trialCount--;
-            updateTrialMeter();
+            if (!isPremium) {
+              trialCount--;
+              localStorage.setItem('trialCount', trialCount);
+              updateTrialMeter();
+            }
           } else {
             showPaywallModal();
           }
         });
+
         function showResultsModal() {
           resultsModal.style.display = 'flex';
-          // Generate and display results (reuse your calculation logic)
-          resultsContent.innerHTML = generateResultsHtml();
+          // Get current input values
+          const selectedOption = avgWashPriceEl.selectedOptions[0];
+          const selectedName = selectedOption.dataset.name;
+          const currentAvgWashPrice = selectedName === "Custom Average" ?
+                               parseFloat(customAvgWashPriceEl.value) || 0 :
+                               parseFloat(avgWashPriceEl.value) || 0;
+          const selectedProgramNameDisplay = selectedName === "Custom Average" ? `Custom (${currentCurrency}${ (parseFloat(customAvgWashPriceEl.value) || 0).toFixed(2)})` : selectedName;
+
+          const currentInputs = {
+              operatingHours: parseFloat(operatingHoursEl.value) || 0,
+              carsPerHour: parseFloat(carsPerHourEl.value) || 0,
+              avgWashPrice: currentAvgWashPrice,
+              numEmployees: parseFloat(numEmployeesEl.value) || 0,
+              avgGrossSalary: parseFloat(avgGrossSalaryEl.value) || 0,
+              monthlyRent: parseFloat(monthlyRentEl.value) || 0,
+              monthlyUtilitiesBase: parseFloat(monthlyUtilitiesBaseEl.value) || 0,
+              monthlyInsuranceOther: parseFloat(monthlyInsuranceOtherEl.value) || 0,
+              waterCostPerCar: parseFloat(waterCostPerCarEl.value) || 0,
+              soapCostPerCar: parseFloat(soapCostPerCarEl.value) || 0,
+              electricityCostPerCar: parseFloat(electricityCostPerCarEl.value) || 0,
+              directLaborPerCar: parseFloat(directLaborPerCarEl.value) || 0,
+              selectedProgramNameDisplay: selectedProgramNameDisplay
+          };
+
+          // Calculate results
+          const results = calculateSimulation(currentInputs);
+
+          // Generate and display results HTML
+          resultsContent.innerHTML = `
+            <div class="space-y-2">
+              <div><strong>Selected Wash Program:</strong> ${results.selectedProgramNameDisplay}</div>
+              <div><strong>Total Cars per Day:</strong> ${results.totalCarsDay.toFixed(0)}</div>
+              <div><strong>Estimated Daily Revenue:</strong> ${currentCurrency}${results.dailyRevenue.toFixed(2)}</div>
+              <div><strong>Calculated Total Variable Cost per Car:</strong> ${currentCurrency}${results.totalVariableCostPerCar.toFixed(2)}</div>
+              <div><strong>Estimated Daily Variable Costs (Total):</strong> ${currentCurrency}${results.dailyTotalVariableCosts.toFixed(2)}</div>
+              <div><strong>Calculated Monthly Salary Costs (Employer):</strong> ${currentCurrency}${results.totalMonthlySalaryCosts.toFixed(2)}</div>
+              <div class="pl-2 text-xs text-gray-500">Gross Salaries (Monthly): ${currentCurrency}${results.totalGrossMonthlySalaries.toFixed(2)}<br>Employer SS (Monthly, ~${(currentEmployerSSRate * 100).toFixed(2)}%): ${currentCurrency}${results.employerSSContribution.toFixed(2)}</div>
+              <div><strong>Calculated Total Daily Fixed Costs:</strong> ${currentCurrency}${results.totalDailyFixedCosts.toFixed(2)}</div>
+              <div class="pl-2 text-xs text-gray-500">Includes: Monthly Salary Costs, Rent, Utilities, Insurance/Other</div>
+              <div><strong>Estimated Daily Profit:</strong> <span class="${results.dailyProfit < 0 ? 'text-red-500' : 'text-blue-600'}">${currentCurrency}${results.dailyProfit.toFixed(2)}</span></div>
+              <div><strong>Estimated Monthly Revenue (30 days):</strong> ${currentCurrency}${results.monthlyRevenue.toFixed(2)}</div>
+              <div><strong>Estimated Monthly Profit (30 days):</strong> <span class="${results.monthlyProfit < 0 ? 'text-red-500' : 'text-blue-600'}">${currentCurrency}${results.monthlyProfit.toFixed(2)}</span></div>
+              <div id="busynessIndicator" class="${results.busynessClass}">
+                  <p class="font-semibold">Operational Load:</p>
+                  <p id="busynessText" class="text-lg font-bold">${results.busynessText}</p>
+              </div>
+            </div>
+          `;
+          // Re-attach event listeners for buttons inside the modal after content is rendered
+          const saveScenarioBtn = document.getElementById('saveScenarioBtn');
+          const downloadPdfBtn = document.getElementById('downloadPdfBtn');
+          if (saveScenarioBtn) saveScenarioBtn.onclick = showPaywallModal;
+          if (downloadPdfBtn) downloadPdfBtn.onclick = showPaywallModal;
         }
+
         function updateTrialMeter() {
           if (trialCount > 0) {
             trialMeter.textContent = `${trialCount} free scenario${trialCount === 1 ? '' : 's'} left`;
@@ -971,13 +899,55 @@
             trialMeter.classList.add('bg-red-400', 'text-white');
           }
         }
+
         function showPaywallModal() {
           paywallModal.style.display = 'flex';
         }
+
         closeResultsModal.addEventListener('click', () => { resultsModal.style.display = 'none'; });
         closePaywallModal.addEventListener('click', () => { paywallModal.style.display = 'none'; });
-        saveScenarioBtn.addEventListener('click', showPaywallModal);
-        downloadPdfBtn.addEventListener('click', showPaywallModal);
+
+        // Supabase Auth Functions (moved here for clarity, but initialized at top)
+        async function signUp() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const { error } = await supabase.auth.signUp({ email, password });
+            document.getElementById('auth-status').textContent = error ? error.message : 'Check your email for confirmation!';
+            if (!error) setTimeout(() => { authModal.style.display = 'none'; }, 1200);
+        }
+
+        async function signIn() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const { error } = await supabase.auth.signInWithPassword({ email, password });
+            document.getElementById('auth-status').textContent = error ? error.message : 'Signed in!';
+            if (!error) setTimeout(() => { authModal.style.display = 'none'; }, 800);
+        }
+
+        async function signOut() {
+            await supabase.auth.signOut();
+            document.getElementById('auth-status').textContent = 'Signed out!';
+        }
+
+        supabase.auth.onAuthStateChange((event, session) => {
+            if (session && session.user) {
+                document.getElementById('auth-status').textContent = `Logged in as ${session.user.email}`;
+            } else {
+                document.getElementById('auth-status').textContent = 'Not logged in';
+            }
+        });
+
+        // Dummy checkout simulation for Upgrade Now button
+        const upgradeBtn = document.getElementById('upgradeNowBtn');
+        if (upgradeBtn) {
+          upgradeBtn.addEventListener('click', () => {
+            // Simulate successful purchase
+            localStorage.setItem('isPremium', 'true');
+            paywallModal.style.display = 'none';
+            appendMessage('🎉 Thank you for upgrading to Pro! Premium features unlocked.', 'assistant');
+            // Optionally update UI elements here, e.g., hide paywall triggers
+          });
+        }
     </script>
 </body>
 </html>
